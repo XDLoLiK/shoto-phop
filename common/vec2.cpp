@@ -11,7 +11,6 @@ Vec2& Vec2::operator*=(long double scale)
 {
 	m_x *= scale;
 	m_y *= scale;
-
 	return *this;
 }
 
@@ -19,7 +18,6 @@ Vec2 operator*(const Vec2& vec, long double num)
 {
 	Vec2 newVec = vec;
 	newVec *= num;
-
 	return newVec;
 }
 
@@ -37,7 +35,6 @@ Vec2& Vec2::operator+=(const Vec2& vec)
 {
 	m_x += vec.getX();
 	m_y += vec.getY();
-
 	return *this;
 }
 
@@ -45,7 +42,6 @@ Vec2 operator+(const Vec2& vec1, const Vec2& vec2)
 {
 	Vec2 newVec = vec1;
 	newVec += vec2;
-
 	return newVec;
 }
 
@@ -53,7 +49,6 @@ Vec2& Vec2::operator-=(const Vec2& vec)
 {
 	m_x -= vec.getX();
 	m_y -= vec.getY();
-	
 	return *this;	
 }
 
@@ -61,7 +56,6 @@ Vec2 operator-(const Vec2& vec1, const Vec2& vec2)
 {
 	Vec2 newVec = vec1;
 	newVec -= vec2;
-
 	return newVec;
 }
 

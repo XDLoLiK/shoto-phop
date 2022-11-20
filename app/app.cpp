@@ -5,7 +5,9 @@
 extern std::vector<Widget*> __heapWidgets__;
 extern std::vector<Widget*> __heapWidgetArrays__;
 
-App* __theApp__ = nullptr;
+App*          __theApp__          = nullptr;
+EventManager* __theEventManager__ = nullptr;
+SkinManager*  __theSkinManager__  = nullptr;
 
 
 App::App(const std::string& name, int width, int height):
@@ -13,19 +15,23 @@ App::App(const std::string& name, int width, int height):
 	m_winWidth(width),
 	m_winHeight(height)
 {
-	if (__theApp__ != nullptr)
+	if (__theApp__ != nullptr) {
+		std::cout << "You can have only one App instance" << std::endl;
 		return;
-
-	__theApp__ = this;
+	}
+	__theApp__          = this;
+	__theEventManager__ = &this->m_eventManager;
+	__theSkinManager__  = &this->m_skinManager;
 
 	this->initGraphics();
 
-	window.setName(m_name);
-	window.setGeometry(m_winWidth, m_winHeight);
-	window.open();
+	m_window.setName(m_name);
+	m_window.setGeometry(m_winWidth, m_winHeight);
+	m_window.open();
 
-	renderer.setRenderWindow(&window);
-	textureManager.loadDeafultTextures();
+	m_renderer.setRenderTarget(&m_window);
+
+	m_skinManager.loadDeafultSkins();
 }
 
 App::~App()
@@ -39,8 +45,8 @@ App::~App()
 
 void App::close()
 {
-	window.close();
-	renderer.destroy();
+	m_window.close();
+	m_renderer.destroy();
 
 	m_name = "";
 	m_isRunning = false;
@@ -48,27 +54,39 @@ void App::close()
 
 int App::run()
 {
+	EventManager* eventManager = __theEventManager__;
+
 	m_isRunning = true;
 	const Time frameDelay = 4; /* ~ 240fps */
 
 	while (m_isRunning) {
 		Time frameStart = this->getTime();
 
-		renderer.clear();
+		m_renderer.clear();
 
-		int res = eventManager.getEvent();
-		if (res)  eventManager.processEvent();
-		eventManager.callOnTick(this->getTime());
+		while (eventManager->getEvent()) {
+			eventManager->processEvent();
+		}
 
-		renderer.present();
+		eventManager->callOnTick(this->getTime());
+		m_renderer.present();
 
 		Time frameTime = this->getTime() - frameStart;
-
 		if (frameDelay > frameTime)
 			this->delay(frameDelay - frameTime);	
 	}
 
 	return 0;
+}
+
+Window* App::getWindow()
+{
+	return &m_window;
+}
+
+Renderer* App::getRenderer()
+{
+	return &m_renderer;
 }
 
 Time App::getTime()
@@ -81,22 +99,31 @@ void App::delay(Time time)
 	SDL_Delay(time);
 }
 
-void App::initGraphics()
+bool App::initGraphics()
 {
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		std::cout << SDL_GetError() << std::endl;
+		return false;
+	}
 
 	int flags     = IMG_INIT_JPG | IMG_INIT_PNG;
 	int initFlags = IMG_Init(flags);
 
-	if ((initFlags & flags) != flags)
+	if ((initFlags & flags) != flags) {
 		std::cout << IMG_GetError() << std::endl;
+		return false;
+	}
+
+	TTF_Init();
+
+	return true;
 }
 
 void App::destroyGraphics()
 {
 	IMG_Quit();
 	SDL_Quit();
+	TTF_Quit();
 }
 
 void App::clearHeapWidgets()
@@ -112,4 +139,9 @@ void App::clearHeapWidgets()
 
 	__heapWidgetArrays__.clear();
 	__heapWidgetArrays__.shrink_to_fit();
+}
+
+App* getApp()
+{
+	return __theApp__;
 }

@@ -1,4 +1,4 @@
-SRC_DIRS := . app app/window app/renderer app/event_manager common widgets widgets/textures user_classes
+SRC_DIRS := . app common sdl/textures sdl/event_manager sdl/renderer sdl/window widgets signals modifiers instruments standart
 VPATH += $(SRC_DIRS)
 
 INC_DIRS := include
@@ -24,7 +24,7 @@ CXX_FLAGS += -D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive
 -fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer\
 -Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE -fsanitize=address
 
-SDL_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
+SDL_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 
 all: prepare $(APPLICATION)
 

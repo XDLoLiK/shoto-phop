@@ -3,8 +3,9 @@
 
 #include "window.hpp"
 #include "renderer.hpp"
+
 #include "event_manager.hpp"
-#include "texture_manager.hpp"
+#include "skin_manager.hpp"
 
 class App
 {
@@ -19,15 +20,19 @@ public:
 	int run();
 
 private:
-	void initGraphics();
+	bool initGraphics();
 	void destroyGraphics();
 	void clearHeapWidgets();
 
 public:
-	TextureManager  textureManager  = TextureManager();
-	EventManager    eventManager    = EventManager();
-	Window          window          = Window();
-	Renderer        renderer        = Renderer();
+	Window*   getWindow();
+	Renderer* getRenderer();
+
+private:
+	SkinManager  m_skinManager  = SkinManager();
+	EventManager m_eventManager = EventManager();
+	Window       m_window       = Window();
+	Renderer     m_renderer     = Renderer();
 
 private:
 	std::string m_name = "";
@@ -37,5 +42,7 @@ private:
 
 	bool m_isRunning = false;
 };
+
+App* getApp();
 
 #endif // APP_HPP

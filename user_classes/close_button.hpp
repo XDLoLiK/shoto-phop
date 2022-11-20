@@ -1,7 +1,9 @@
 #include "app.hpp"
 #include "button.hpp"
 
+
 extern App* __theApp__;
+
 
 class CloseButton : public Button
 {

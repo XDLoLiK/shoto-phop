@@ -1,16 +1,19 @@
 #ifndef WIDGET_HPP
 #define WIDGET_HPP
 
-#include "gvec.hpp"
+#include "vec.hpp"
 #include "rect.hpp"
 
 #include "event_manager.hpp"
-#include "texture_manager.hpp"
+#include "skin_manager.hpp"
+
+#include "modifiers/serializable.hpp"
 
 class Widget
 {
 public:
 	Widget(Widget* parent = nullptr);
+	Widget(const Rect& bounds, Widget* parent = nullptr);
 	virtual ~Widget();
 
 	Widget& operator=(const Widget& other) = delete;
@@ -18,57 +21,64 @@ public:
 
 	void* operator new(size_t size);
 	void  operator delete(void* memptr);
+
 	void* operator new [](size_t size);
 	void  operator delete [](void* memptr);
 
-	void show();
+	virtual void show();
+	virtual bool isHidden() const;
+	virtual void setHidden(bool val);
 
-	void setGeometry(const Rect& bounds);
-	void setGeometry(int x, int y, int w, int h);
+	virtual bool isClicked() const;
+	virtual void setClicked(bool val);
 
-	bool isHidden() const;
-	void setHidden(bool val);
+	virtual bool isHolded() const;
+	virtual void setHolded(bool val);
 
-	bool isHolded() const;
-	void setHolded(bool val);
+	virtual bool isInFocuse() const;
+	virtual void setInFocuse(bool val);
 
-	const Texture* getTexture() const;
-	void setTexture(const std::string& name);
+	virtual const Rect& getBounds() const;
 
-	const Rect& getBounds() const;
+	virtual void setGeometry(const Rect& bounds);
+	virtual void setGeometry(int x, int y, int w = -1, int h = -1);
 
-public:
+	virtual void addChild   (Widget* child);
+	virtual void removeChild(Widget* child);
+
+	virtual size_t getChildCount();
+	virtual Widget* getChild(size_t pos);
+	virtual Widget* getParent();
+	virtual void setParent(Widget* parent);
+
+public: /* pure virtual */
 	virtual void draw()                        = 0;
 	virtual bool intersects(const Vec2& point) = 0;
 
-	virtual void addChild   (Widget* child)    = 0;
-	virtual void removeChild(Widget* child)    = 0;
+	virtual bool onMouseMove(const Vec2& point, const Vec2& motion)     = 0;
+	virtual bool onButtonClick  (MouseButton button, const Vec2& point) = 0;
+	virtual bool onButtonRelease(MouseButton button, const Vec2& point) = 0;
 
-	virtual size_t getChildCount()             = 0;
-	virtual Widget* getChild(size_t pos)       = 0;
-	virtual Widget* getParent()                = 0;
-
-	virtual void onMouseMove(const Vec2& point, const Vec2& motion)     = 0;
-	virtual void onButtonClick  (MouseButton button, const Vec2& point) = 0;
-	virtual void onButtonRelease(MouseButton button, const Vec2& point) = 0;
-
-	virtual void onKeyPress  (Key key) = 0;
-	virtual void onKeyRelease(Key key) = 0;
-	virtual void onTick(Time time)     = 0;
+	virtual bool onKeyPress  (Key key) = 0;
+	virtual bool onKeyRelease(Key key) = 0;
+	virtual bool onTick(Time time)     = 0;
 
 protected:
 	Widget* m_parent = nullptr;
-	bool m_isHidden  = true;
-	bool m_isHolded  = false;
+
+	bool m_isHidden   = true;
+	bool m_isClicked  = false;
+	bool m_isHolded   = false;
+	bool m_isInFocuse = false;
 
 	Rect m_bounds = Rect(0, 0, 0, 0);
-	const Texture* m_texture = nullptr;
 };
 
 class ContainerWidget : public Widget
 {
 public:
 	ContainerWidget(Widget* parent = nullptr);
+	ContainerWidget(const Rect& bounds, Widget* parent = nullptr);
 	virtual ~ContainerWidget();
 
 	virtual void addChild   (Widget* child)    override;
@@ -76,10 +86,32 @@ public:
 
 	virtual size_t getChildCount()             override;
 	virtual Widget* getChild(size_t pos)       override;
-	virtual Widget* getParent()                override;
 
 protected:
 	ChildrenManager m_childrenManager = ChildrenManager();
+	std::vector<Widget*> m_children = {};
+};
+
+class ModalWidget : public Widget
+{
+public:
+	ModalWidget(Widget* parent = nullptr);
+	ModalWidget(const Rect& bounds, Widget* parent = nullptr);
+	virtual ~ModalWidget();
+
+	ModalWidget& operator=(ModalWidget& other) = delete;
+	ModalWidget(ModalWidget& other)            = delete;
+
+	virtual void addChild   (Widget* child)    override;
+	virtual void removeChild(Widget* child)    override;
+
+	virtual size_t getChildCount()             override;
+	virtual Widget* getChild(size_t pos)       override;
+
+protected:
+	EventManager  m_eventManager = EventManager();
+	EventManager* m_prevManager  = nullptr;
+
 	std::vector<Widget*> m_children = {};
 };
 

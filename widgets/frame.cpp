@@ -8,7 +8,13 @@ extern App* __theApp__;
 Frame::Frame(Widget* parent):
 	ContainerWidget(parent)
 {
+	this->setBackground(backgroundGrey);
+}
 
+Frame::Frame(const Rect& bounds, Widget* parent):
+	ContainerWidget(bounds, parent)
+{
+	this->setBackground(backgroundGrey);
 }
 
 Frame::~Frame()
@@ -21,8 +27,10 @@ void Frame::draw()
 	if (m_isHidden)
 		return;
 
-	Renderer* renderer = &__theApp__->renderer;
-	renderer->copyTexture(this->getTexture(), m_bounds);
+	drawFrame(m_bounds);
+	drawSkin (m_bounds);
+
+	m_childrenManager.callOnTick(__theApp__->getTime());
 }
 
 bool Frame::intersects(const Vec2& point)
@@ -42,36 +50,53 @@ bool Frame::intersects(const Vec2& point)
 	return true;
 }
 
-void Frame::onMouseMove(const Vec2& point, const Vec2& motion)
-{
-	m_childrenManager.callOnMouseMove(point, motion);
-}
-
-void Frame::onButtonClick(MouseButton button, const Vec2& point)
-{
-	m_childrenManager.callOnButtonClick(button, point);
-}
-
-void Frame::onButtonRelease(MouseButton button, const Vec2& point)
-{
-	m_childrenManager.callOnButtonRelease(button, point);
-}
-
-void Frame::onKeyPress(Key key)
-{
-	m_childrenManager.callOnKeyPress(key);
-}
-
-void Frame::onKeyRelease(Key key)
-{
-	m_childrenManager.callOnKeyRelease(key);
-}
-
-void Frame::onTick(Time time)
+bool Frame::onMouseMove(const Vec2& point, const Vec2& motion)
 {
 	if (m_isHidden)
-		return;
+		return false;
+	
+	return m_childrenManager.callOnMouseMove(point, motion);
+}
+
+bool Frame::onButtonClick(MouseButton button, const Vec2& point)
+{
+	if (m_isHidden)
+		return false;
+
+	return m_childrenManager.callOnButtonClick(button, point);
+}
+
+bool Frame::onButtonRelease(MouseButton button, const Vec2& point)
+{
+	if (m_isHidden)
+		return false;
+
+	return m_childrenManager.callOnButtonRelease(button, point);
+}
+
+bool Frame::onKeyPress(Key key)
+{
+	if (m_isHidden)
+		return false;
+
+	return m_childrenManager.callOnKeyPress(key);
+}
+
+bool Frame::onKeyRelease(Key key)
+{
+	if (m_isHidden)
+		return false;
+
+	return m_childrenManager.callOnKeyRelease(key);
+}
+
+bool Frame::onTick(Time time)
+{
+	if (m_isHidden)
+		return false;
 
 	this->draw();
 	m_childrenManager.callOnTick(time);
+
+	return true;
 }

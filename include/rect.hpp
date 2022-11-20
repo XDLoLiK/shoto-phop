@@ -1,19 +1,7 @@
 #ifndef RECT_HPP
 #define RECT_HPP
 
-class Rect
-{
-public:
-	Rect(int xc = 0, int yc = 0, int width = 0, int height = 0):
-		x(xc),
-		y(yc),
-		w(width),
-		h(height)
-	{
-
-	}
-
-public:
+struct Rect {
 	int x = 0;
 	int y = 0;
 	int w = 0;

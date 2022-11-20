@@ -1,4 +1,4 @@
-#ifndef MENU_BUTTONS_HPP
+	#ifndef MENU_BUTTONS_HPP
 #define MENU_BUTTONS_HPP
 
 #include "frame.hpp"

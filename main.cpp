@@ -1,43 +1,63 @@
 #include "app.hpp"
-#include "user_widgets.hpp"
+#include "button.hpp"
+#include "frame.hpp"
+#include "canvas.hpp"
+#include "brush.hpp"
+#include "bucket.hpp"
+#include "eraser.hpp"
+#include "drop_list.hpp"
 
 int main()
 {
-	App app("test");
+	App app("ShotoPhop");
 
-	Frame* rayTracer = new Frame();
-	rayTracer->setGeometry({0, 125, 600, 600});
-	rayTracer->setTexture("skins/ray_tracer_high.png");
-	rayTracer->show();
+	Frame mainFrame({0, 0, 1920, 1080});
+	mainFrame.setBackground("./skins/bg.png");
+	mainFrame.show();
 
-	Frame* menuFrame = new Frame();
-	menuFrame->setGeometry({0, 0, 800, 100});
-	menuFrame->setTexture("./skins/menu_frame.png");
-	menuFrame->show();
+	Frame toolBox({100, 280, 380, 650});
+	toolBox.setBackground(white);
+	toolBox.show();
 
-	CloseButton* closeButton = new CloseButton("close", menuFrame);
-	closeButton->setGeometry({50, 25, 100, 50});
-	closeButton->setTexture("skins/close_button.png");
-	closeButton->show();
+	Canvas canvas({620, 140, 1220, 820});
+	canvas.show();
+	canvas.addToolBox(&toolBox);
 
-	DropList* chooseGraphicsList = new DropList("choose", menuFrame);
-	chooseGraphicsList->setGeometry({175, 25, 100, 50});
-	chooseGraphicsList->setTexture("skins/graphics_button.png");
+	Frame menuFrame({0, 0, 1920, 52});
+	menuFrame.setBackground(Color(251, 224, 243, 140));
+	menuFrame.setFrameColor(Color(251, 224, 243, 140));
+	menuFrame.show();
 
-	ChooseButton* lowGraphics = new ChooseButton("", chooseGraphicsList, 
-		                                   rayTracer, "skins/ray_tracer_low.png");
-	lowGraphics->setGeometry({0, 50, 100, 50});
-	lowGraphics->setTexture("skins/low.png");
+	Button closeButton("Exit", {0, 0, 100, 52});
+	closeButton.buttonClick += METHOD(app, App::close);
+	closeButton.show();
 
-	ChooseButton* midGraphics = new ChooseButton("", chooseGraphicsList,
-		                                   rayTracer, "skins/ray_tracer_mid.png");
-	midGraphics->setGeometry({0, 100, 100, 50});
-	midGraphics->setTexture("skins/mid.png");
+	DropList fileList("File", {100, 0, 100, 52});
+	fileList.show();
 
-	ChooseButton* highGraphics = new ChooseButton("", chooseGraphicsList,
-		                                    rayTracer, "skins/ray_tracer_high.png");
-	highGraphics->setGeometry({0, 150, 100, 50});
-	highGraphics->setTexture("skins/high.png");
+	Button saveButton("Save", {0, 0, 360, 52});
+	saveButton.buttonClick += METHOD(canvas, Canvas::save);
+	fileList.addEntry(&saveButton);
+
+	Button saveAsButton("Save As", {0, 0, 360, 52});
+	saveAsButton.buttonClick += METHOD(canvas, Canvas::saveAs);
+	fileList.addEntry(&saveAsButton);
+
+	Button openButton("Open", {0, 0, 360, 52});
+	openButton.buttonClick += METHOD(canvas, Canvas::open);
+	fileList.addEntry(&openButton);
+
+	Button toolsButton("Tools", {200, 0, 100, 52});
+	toolsButton.show();
+
+	Brush* brush = new Brush("./skins/brush.png");
+	canvas.addTool(brush);
+
+	Bucket* bucket = new Bucket("./skins/bucket.png");
+	canvas.addTool(bucket);
+
+	Eraser* eraser = new Eraser("./skins/eraser.png");
+	canvas.addTool(eraser);
 
 	return app.run();
 }

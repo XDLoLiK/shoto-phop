@@ -2,7 +2,8 @@
 #include "widget.hpp"
 
 
-extern App* __theApp__;
+extern App*          __theApp__;
+extern EventManager* __theEventManager__;
 
 std::vector<Widget*> __heapWidgets__      = std::vector<Widget*>(0);
 std::vector<Widget*> __heapWidgetArrays__ = std::vector<Widget*>(0);
@@ -13,8 +14,16 @@ Widget::Widget(Widget* parent):
 {
 	if (m_parent)
 		m_parent->addChild(this);
+}
 
-	m_isHidden = false;
+Widget::Widget(const Rect& bounds, Widget* parent):
+	m_parent(parent),
+	m_bounds(bounds)
+{
+	if (m_parent)
+		m_parent->addChild(this);
+
+	this->setGeometry(m_bounds);
 }
 
 Widget::~Widget()
@@ -25,7 +34,8 @@ Widget::~Widget()
 
 void Widget::show()
 {
-	__theApp__->eventManager += this;
+	*__theEventManager__ += this;
+	m_isHidden = false;
 }
 
 void Widget::setGeometry(const Rect& bounds)
@@ -34,22 +44,18 @@ void Widget::setGeometry(const Rect& bounds)
 	Widget* curWid = m_parent;
 
 	while (curWid) {
-		m_bounds.x += curWid->m_bounds.x;
-		m_bounds.y += curWid->m_bounds.y;
-		curWid = curWid->m_parent;
+		m_bounds.x += curWid->getBounds().x;
+		m_bounds.y += curWid->getBounds().y;
+		curWid = curWid->getParent();
 	}
 }
 
 void Widget::setGeometry(int x, int y, int w, int h)
 {
-	m_bounds = {x, y, w, h};
-	Widget* curWid = m_parent;
+	w = (w == -1) ? m_bounds.w : w;
+	h = (h == -1) ? m_bounds.h : h;
 
-	while (curWid) {
-		m_bounds.x += curWid->m_bounds.x;
-		m_bounds.y += curWid->m_bounds.y;
-		curWid = curWid->m_parent;
-	}
+	this->setGeometry({x, y, w, h});
 }
 
 bool Widget::isHidden() const
@@ -72,27 +78,59 @@ void Widget::setHolded(bool val)
 	m_isHolded = val;
 }
 
-const Texture* Widget::getTexture() const
+bool Widget::isClicked() const
 {
-	return m_texture;
+	return m_isClicked;
 }
 
-void Widget::setTexture(const std::string& name)
+void Widget::setClicked(bool val)
 {
-	TextureManager* textureManager = &__theApp__->textureManager;
-	const Texture* foundTexture = textureManager->getTexture(name);
+	m_isClicked = val;
+}
 
-	if (!foundTexture) {
-		textureManager->loadTexture(name);
-		foundTexture = textureManager->getTexture(name);
-	}
+bool Widget::isInFocuse() const
+{
+	return m_isInFocuse;
+}
 
-	m_texture = foundTexture;
+void Widget::setInFocuse(bool val)
+{
+	m_isInFocuse = val;
 }
 
 const Rect& Widget::getBounds() const
 {
 	return m_bounds;
+}
+
+void Widget::addChild(Widget*)
+{
+
+}
+
+void Widget::removeChild(Widget*)
+{
+
+}
+
+size_t Widget::getChildCount()
+{
+	return 0;
+}
+
+Widget* Widget::getChild(size_t)
+{
+	return nullptr;
+}
+
+Widget* Widget::getParent()
+{
+	return m_parent;
+}
+
+void Widget::setParent(Widget* parent)
+{
+	m_parent = parent;
 }
 
 void* Widget::operator new(size_t size)
@@ -106,7 +144,7 @@ void* Widget::operator new(size_t size)
 void* Widget::operator new [](size_t size)
 {
 	void* mem = calloc(1, size);
-	__heapWidgetArrays__.push_back(reinterpret_cast<Widget*>(mem + 8));
+	__heapWidgetArrays__.push_back(reinterpret_cast<Widget*>((char*)mem + 8));
 
 	return mem;
 }
@@ -125,7 +163,7 @@ void Widget::operator delete(void* mem)
 
 void Widget::operator delete [](void* mem)
 {
-	Widget* wid = reinterpret_cast<Widget*>(mem + 8);
+	Widget* wid = reinterpret_cast<Widget*>((char*)mem + 8);
 
 	auto begin = __heapWidgetArrays__.begin();
 	auto end   = __heapWidgetArrays__.end();
@@ -137,6 +175,12 @@ void Widget::operator delete [](void* mem)
 
 ContainerWidget::ContainerWidget(Widget* parent):
 	Widget(parent)
+{
+
+}
+
+ContainerWidget::ContainerWidget(const Rect& bounds, Widget* parent):
+	Widget(bounds, parent)
 {
 
 }
@@ -166,7 +210,7 @@ void ContainerWidget::removeChild(Widget* child)
 
 size_t ContainerWidget::getChildCount()
 {
-	m_children.size();
+	return m_children.size();
 }
 
 Widget* ContainerWidget::getChild(size_t pos)
@@ -174,7 +218,51 @@ Widget* ContainerWidget::getChild(size_t pos)
 	return m_children.at(pos);
 }
 
-Widget* ContainerWidget::getParent()
+ModalWidget::ModalWidget(Widget* parent):
+	Widget(parent)
 {
-	return m_parent;
+	m_prevManager = __theEventManager__;
+	__theEventManager__ = &m_eventManager;
+}
+
+ModalWidget::ModalWidget(const Rect& bounds, Widget* parent):
+	Widget(bounds, parent)
+{
+
+}
+
+ModalWidget::~ModalWidget()
+{
+	m_children.clear();
+	m_children.shrink_to_fit();
+
+	__theEventManager__ = m_prevManager;
+	m_prevManager = nullptr;
+}
+
+void ModalWidget::addChild(Widget* child)
+{
+	if (!child)
+		return;
+
+	m_children.push_back(child);
+	m_eventManager += child;
+}
+
+void ModalWidget::removeChild(Widget* child)
+{
+	auto start = std::remove(m_children.begin(), m_children.end(), child);
+	auto end   = m_children.end();
+
+	m_children.erase(start, end);
+}
+
+size_t ModalWidget::getChildCount()
+{
+	return m_children.size();
+}
+
+Widget* ModalWidget::getChild(size_t pos)
+{
+	return m_children.at(pos);
 }
