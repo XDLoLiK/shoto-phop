@@ -7,6 +7,12 @@
 #include "eraser.hpp"
 #include "drop_list.hpp"
 
+/**
+ *
+ * Tool: reactToMouseLeave
+ *
+ */
+
 int main()
 {
 	App app("ShotoPhop");
@@ -17,6 +23,7 @@ int main()
 
 	Frame toolBox({100, 280, 380, 650});
 	toolBox.setBackground(white);
+	toolBox.setFrameColor(white);
 	toolBox.show();
 
 	Canvas canvas({620, 140, 1220, 820});
@@ -47,7 +54,7 @@ int main()
 	openButton.buttonClick += METHOD(canvas, Canvas::open);
 	fileList.addEntry(&openButton);
 
-	Button toolsButton("Tools", {200, 0, 100, 52});
+	Button toolsButton("Color", {200, 0, 100, 52});
 	toolsButton.show();
 
 	Brush* brush = new Brush("./skins/brush.png");

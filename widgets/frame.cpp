@@ -24,13 +24,8 @@ Frame::~Frame()
 
 void Frame::draw()
 {
-	if (m_isHidden)
-		return;
-
 	drawFrame(m_bounds);
 	drawSkin (m_bounds);
-
-	m_childrenManager.callOnTick(__theApp__->getTime());
 }
 
 bool Frame::intersects(const Vec2& point)

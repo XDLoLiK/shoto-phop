@@ -12,8 +12,10 @@ std::vector<Widget*> __heapWidgetArrays__ = std::vector<Widget*>(0);
 Widget::Widget(Widget* parent):
 	m_parent(parent)
 {
-	if (m_parent)
+	if (m_parent) {
 		m_parent->addChild(this);
+		this->setGeometry(parent->getBounds());
+	}
 }
 
 Widget::Widget(const Rect& bounds, Widget* parent):
