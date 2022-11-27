@@ -3,7 +3,8 @@
 #include "event_manager.hpp"
 
 
-extern App* __theApp__;
+extern App*          __theApp__;
+extern EventManager* __theEventManager__;
 
 
 ChildrenManager::ChildrenManager()
@@ -90,19 +91,35 @@ void ChildrenManager::operator-=(Widget* widget)
 	m_widgets.erase(start, end);
 }
 
-EventManager::EventManager()
+EventManager::EventManager(EventManager* prev):
+	m_prevManager(prev)
 {
-
+	__theEventManager__ = this;
 }
 
 EventManager::~EventManager()
 {
-
+	__theEventManager__ = m_prevManager;
+	m_prevManager = nullptr;
 }
 
 int EventManager::getEvent()
 {
 	return m_event.poll();
+}
+
+bool EventManager::callOnTick(Time time)
+{
+	bool ret = false;
+	
+	if (m_prevManager) {
+		ret &= m_prevManager->callOnTick(time);
+	}
+
+	for (auto wid : m_widgets)
+		ret &= wid->onTick(time);
+
+	return ret;
 }
 
 void EventManager::processEvent()

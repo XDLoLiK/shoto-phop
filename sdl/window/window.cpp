@@ -77,6 +77,7 @@ bool Window::open()
 	}
 
 	Uint32 flags = (m_width && m_height) ? 0 : SDL_WINDOW_MAXIMIZED;
+	flags |= SDL_WINDOW_BORDERLESS;
 	m_realWindow = SDL_CreateWindow(m_name.c_str(), SDL_WINDOWPOS_CENTERED,
 		                      SDL_WINDOWPOS_CENTERED, m_width, m_height, flags);
 	if (!m_realWindow) {

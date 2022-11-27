@@ -15,6 +15,7 @@ public:
 
 	void setBackground(const Color& color);
 	void setBackground(const std::string& name);
+	void setBackground(const Texture* texture);
 
 protected:
 	void drawSkin(const Rect& bounds);

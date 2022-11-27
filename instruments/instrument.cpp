@@ -24,7 +24,7 @@ bool Instrument::isSelected(MouseButton button, const Vec2& point)
 	if (m_icon->intersects(point) && button == SDL_BUTTON_LEFT)
 		return true;
 
-	return false;	
+	return false;
 }
 
 void Instrument::select()

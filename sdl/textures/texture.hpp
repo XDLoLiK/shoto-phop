@@ -8,10 +8,11 @@
 
 #include "rect.hpp"
 #include "color.hpp"
+#include "tools.hpp"
 
 #define SURFACE_SIZE_MIN 1
 
-class Surface
+class Surface : public booba::Image
 {
 public:
 	Surface(SDL_Surface* realSurface);
@@ -30,6 +31,17 @@ public:
 	Color* getPixmap(int* width = nullptr, int* height = nullptr);
 	SDL_Surface* getRealSurface() const;
 	void fillColor(const Color& color);
+
+public: /* compatability */
+
+    virtual uint32_t getH() override;
+	virtual uint32_t getW() override;
+
+    virtual uint32_t getPixel(int32_t x, int32_t y)               override;
+    virtual void putPixel(uint32_t x, uint32_t y, uint32_t color) override;
+
+	virtual       uint32_t& operator()(uint32_t x, uint32_t y)       override;
+	virtual const uint32_t& operator()(uint32_t x, uint32_t y) const override;
 
 private:
 	int m_width  = 0;

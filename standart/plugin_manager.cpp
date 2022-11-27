@@ -1,0 +1,111 @@
+#include "plugin_manager.hpp"
+#include "simple_canvas.hpp"
+#include "scrollbar.hpp"
+#include "label.hpp"
+#include "button.hpp"
+
+PluginManager* __thePluginManager__ = nullptr;
+
+PluginManager::PluginManager()
+{
+	if (__thePluginManager__) {
+		return;
+	}
+
+	__thePluginManager__ = this;
+	this->loadPlugins();
+}
+
+PluginManager::~PluginManager()
+{
+
+}
+
+void PluginManager::loadPlugins()
+{
+	const std::string src = "./plugins";
+
+	for (const auto& file : std::filesystem::directory_iterator(src)) {
+		if (file.is_directory()) {
+			continue;
+		}
+
+		void* soHandler = dlopen(file.path().c_str(), RTLD_LAZY);
+		if (!soHandler) {
+			std::cout << "Unable to open " << file.path() << " due to " << dlerror() << std::endl;
+			continue;
+		}
+
+		void (*pluginInit) () = reinterpret_cast<void (*) ()>(dlsym(soHandler, "init_module"));
+		if (!pluginInit) {
+			std::cout << file.path() << " lacks void init_module()" << std::endl;
+			continue;
+		}
+
+		pluginInit();
+	}
+}
+
+void PluginManager::addTool(booba::Tool* tool)
+{
+	m_importedTools.push_back(tool);
+}
+
+uint64_t booba::createButton(int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text)
+{
+	Rect bounds = {x, y, w, h};
+	Button* newButton = new Button(std::string(text), bounds);
+
+	return reinterpret_cast<uint64_t>(newButton);
+}
+
+uint64_t booba::createLabel(int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text)
+{
+	Label* newLabel = new Label(std::string(text), h);
+	Rect bounds = {x, y, w, h};
+	newLabel->setGeometry(bounds);
+
+	return reinterpret_cast<uint64_t>(newLabel);
+}
+
+uint64_t booba::createScrollbar(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t maxValue, int32_t startValue)
+{
+	Rect bounds = {x, y, w, h};
+	HScrollbar* newScrollbar = new HScrollbar(bounds);
+
+	return reinterpret_cast<uint64_t>(newScrollbar);
+}
+
+uint64_t booba::createCanvas(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	Rect bounds = {x, y, w, h};
+	SimpleCanvas* newCanvas = new SimpleCanvas(bounds);
+
+	return reinterpret_cast<uint64_t>(newCanvas);
+}
+
+void booba::putPixel(uint64_t canvas, int32_t x, int32_t y, uint32_t color)
+{
+	SimpleCanvas* canvasPtr = reinterpret_cast<SimpleCanvas*>(canvas);
+	canvasPtr->putPixel(x, y, color);
+}
+
+void booba::putSprite(uint64_t canvas, int32_t x, int32_t y, uint32_t w, uint32_t h, const char* texture)
+{
+	SimpleCanvas* canvasPtr = reinterpret_cast<SimpleCanvas*>(canvas);
+
+	Rect bounds = {x, y, w, h};
+	Surface* blitSurface = new Surface(w, h);
+	
+	canvasPtr->blit(blitSurface, bounds);
+}
+
+void booba::addTool(booba::Tool* tool)
+{
+	__thePluginManager__->addTool(tool);
+}
+
+void booba::addFilter(booba::Tool* tool)
+{
+	__thePluginManager__->addTool(tool);
+}

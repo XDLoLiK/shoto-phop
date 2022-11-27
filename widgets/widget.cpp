@@ -2,9 +2,6 @@
 #include "widget.hpp"
 
 
-extern App*          __theApp__;
-extern EventManager* __theEventManager__;
-
 std::vector<Widget*> __heapWidgets__      = std::vector<Widget*>(0);
 std::vector<Widget*> __heapWidgetArrays__ = std::vector<Widget*>(0);
 
@@ -36,8 +33,16 @@ Widget::~Widget()
 
 void Widget::show()
 {
-	*__theEventManager__ += this;
+	EventManager* manager = getEventManager();
+	*manager += this;
 	m_isHidden = false;
+}
+
+void Widget::hide()
+{
+	EventManager* manager = getEventManager();
+	*manager -= this;
+	m_isHidden = true;
 }
 
 void Widget::setGeometry(const Rect& bounds)
@@ -223,14 +228,15 @@ Widget* ContainerWidget::getChild(size_t pos)
 ModalWidget::ModalWidget(Widget* parent):
 	Widget(parent)
 {
-	m_prevManager = __theEventManager__;
-	__theEventManager__ = &m_eventManager;
+	EventManager* manager = getEventManager();
+	m_eventManager = new EventManager(manager);
 }
 
 ModalWidget::ModalWidget(const Rect& bounds, Widget* parent):
 	Widget(bounds, parent)
 {
-
+	EventManager* manager = getEventManager();
+	m_eventManager = new EventManager(manager);
 }
 
 ModalWidget::~ModalWidget()
@@ -238,8 +244,8 @@ ModalWidget::~ModalWidget()
 	m_children.clear();
 	m_children.shrink_to_fit();
 
-	__theEventManager__ = m_prevManager;
-	m_prevManager = nullptr;
+	delete m_eventManager;
+	m_eventManager = nullptr;
 }
 
 void ModalWidget::addChild(Widget* child)
@@ -248,7 +254,7 @@ void ModalWidget::addChild(Widget* child)
 		return;
 
 	m_children.push_back(child);
-	m_eventManager += child;
+	m_childrenManager += child;
 }
 
 void ModalWidget::removeChild(Widget* child)

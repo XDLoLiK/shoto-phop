@@ -9,6 +9,8 @@ Renderer::Renderer(Window* window)
 	m_realRenderer = SDL_CreateRenderer(window->getRealWindow(), -1, flags);
 	if (!m_realRenderer)
 		std::cout << SDL_GetError() << std::endl;
+
+	SDL_SetRenderDrawBlendMode(m_realRenderer, SDL_BLENDMODE_BLEND);
 }
 
 bool Renderer::setRenderTarget(Window* window)

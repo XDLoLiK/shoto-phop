@@ -2,7 +2,7 @@
 #include "app.hpp"
 
 
-extern App* __theApp__;
+extern booba::ApplicationContext* booba::APPCONTEXT;
 
 
 Canvas::Canvas(const Rect& bounds, Widget* parent):
@@ -23,6 +23,11 @@ Canvas::Canvas(const Rect& bounds, Widget* parent):
 	m_cornerSquare->setBackground(Color(102, 102, 102, 255));
 	m_cornerSquare->setFrameColor(Color(102, 102, 102, 255));
 	m_cornerSquare->show();
+
+	if (booba::APPCONTEXT) {
+		m_fgColor = Color(booba::APPCONTEXT->fgColor);
+		m_bgColor = Color(booba::APPCONTEXT->bgColor);
+	}
 }
 
 Canvas::~Canvas()
@@ -51,6 +56,16 @@ void Canvas::saveAs()
 void Canvas::open()
 {
 
+}
+
+void Canvas::setFGColor(const Color& newColor)
+{
+	m_fgColor = newColor;
+}
+
+void Canvas::setBGColor(const Color& newColor)
+{
+	m_bgColor = newColor;
 }
 
 void Canvas::addTool(Instrument* tool)
@@ -112,7 +127,7 @@ bool Canvas::onMouseMove(const Vec2& point, const Vec2& motion)
 	if (m_isHidden)
 		return false;
 	
-	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, 0);
+	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
 
 	bool res = false;
 	if (this->intersects(point)) res &= m_toolManager.reactToMouseMove (m_drawingSurface, relPoint, motion);
@@ -140,7 +155,7 @@ bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 	if (m_prevStates.size() > m_maxStates)
 		m_prevStates.pop_front();
 
-	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, 0);
+	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
 	res &= m_toolManager.reactToButtonClick(m_drawingSurface, button, relPoint);
 	res &= m_childrenManager.callOnButtonClick(button, point);
 
@@ -152,7 +167,7 @@ bool Canvas::onButtonRelease(MouseButton button, const Vec2& point)
 	if (m_isHidden || !this->intersects(point))
 		return false;
 
-	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, 0);
+	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
 	bool res = m_toolManager.reactToButtonRelease(m_drawingSurface, button, relPoint);
 	res &= m_childrenManager.callOnButtonRelease(button, point);
 

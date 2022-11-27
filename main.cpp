@@ -5,13 +5,19 @@
 #include "brush.hpp"
 #include "bucket.hpp"
 #include "eraser.hpp"
+#include "revealer.hpp"
 #include "drop_list.hpp"
+#include "context_button.hpp"
+#include "dynamic_window.hpp"
+#include "plugin_manager.hpp"
+#include "color_chooser.hpp"
 
-/**
- *
- * Tool: reactToMouseLeave
- *
- */
+booba::ApplicationContext* booba::APPCONTEXT = nullptr;
+
+void showWin(DynamicWindow* win)
+{
+	win->show();
+}
 
 int main()
 {
@@ -54,17 +60,34 @@ int main()
 	openButton.buttonClick += METHOD(canvas, Canvas::open);
 	fileList.addEntry(&openButton);
 
-	Button toolsButton("Color", {200, 0, 100, 52});
-	toolsButton.show();
+	DynamicWindow* colorChoiseWin = new DynamicWindow({100, 100, 600, 600});
+	
+	ColorPicker test({100, 100, 400, 400});
+	test.show();
 
-	Brush* brush = new Brush("./skins/brush.png");
-	canvas.addTool(brush);
+	ContextButton<DynamicWindow> colorButton("Color", {200, 0, 100, 52});
+	colorButton.setContext(colorChoiseWin);
+	colorButton.setAction(showWin);
+	colorButton.show();
 
-	Bucket* bucket = new Bucket("./skins/bucket.png");
-	canvas.addTool(bucket);
+	Brush brush("./skins/brush.png");
+	canvas.addTool(&brush);
 
-	Eraser* eraser = new Eraser("./skins/eraser.png");
-	canvas.addTool(eraser);
+	Bucket bucket("./skins/bucket.png");
+	canvas.addTool(&bucket);
+
+	Eraser eraser("./skins/eraser.png");
+	canvas.addTool(&eraser);
+
+	Revealer reavealer("./skins/revealer.png");
+	canvas.addTool(&reavealer);
+
+	booba::APPCONTEXT = new booba::ApplicationContext();
+	booba::APPCONTEXT->fgColor = black.mapRGBA();
+	booba::APPCONTEXT->bgColor = white.mapRGBA();
+
+	PluginManager pluginManager;
+	pluginManager.loadPlugins();
 
 	return app.run();
 }

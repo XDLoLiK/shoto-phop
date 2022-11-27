@@ -1,4 +1,4 @@
-	#ifndef BUTTON_HPP
+#ifndef BUTTON_HPP
 #define BUTTON_HPP
 
 #include "widget.hpp"
@@ -7,8 +7,9 @@
 
 #include "modifiers/framable.hpp"
 #include "modifiers/skinnable.hpp"
+#include "modifiers/hoverable.hpp"
 
-class Button : public Widget, public Framable, public Skinnable
+class Button : public Widget, public Framable, public Skinnable, public Hoverable
 {
 public:
 	Button(const std::string& text = "", int size = 0, Widget* parent = nullptr);
@@ -17,6 +18,9 @@ public:
 
 	Button& operator=(Button& other) = default;
 	Button(Button& other)            = default;
+
+	void setFrameHoverColor(const Color& color);
+	void setFrameDefaultColor(const Color& color);
 
 public:
 	virtual void setGeometry(const Rect& bounds)                   override;
@@ -39,6 +43,9 @@ public:
 
 private:
 	Label* m_label = nullptr;
+
+	Color m_frameHoverColor   = Color(185, 130, 183, 255);
+	Color m_frameDefaultColor = Color(231, 178, 212, 255);
 };
 
 #endif // BUTTON_HPP

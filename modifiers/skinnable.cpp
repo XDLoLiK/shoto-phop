@@ -12,8 +12,11 @@ Skinnable::Skinnable()
 
 Skinnable::~Skinnable()
 {
-	if (m_toDelete && m_hasSkin)
+	if (m_toDelete && m_hasSkin) {
 		delete m_skin;
+	}
+
+	m_skin = nullptr;
 }
 
 void Skinnable::setBackground(const Color& color)
@@ -46,6 +49,16 @@ void Skinnable::setBackground(const std::string& name)
 		m_hasSkin  = true;
 		m_toDelete = false;
 	}
+}
+
+void Skinnable::setBackground(const Texture* texture)
+{
+	if (m_toDelete && m_hasSkin)
+		delete m_skin;
+
+	m_skin = texture;
+	m_hasSkin  = true;
+	m_toDelete = false;
 }
 
 void Skinnable::drawSkin(const Rect& bounds)

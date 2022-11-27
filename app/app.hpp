@@ -44,5 +44,7 @@ private:
 };
 
 App* getApp();
+EventManager* getEventManager();
+SkinManager*  getSkinManager ();
 
 #endif // APP_HPP

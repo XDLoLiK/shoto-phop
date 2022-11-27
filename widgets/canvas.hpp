@@ -27,6 +27,9 @@ public:
 	void saveAs();
 	void open();
 
+	void setFGColor(const Color& newColor);
+	void setBGColor(const Color& newColor);
+
 public:
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;
@@ -40,9 +43,9 @@ public:
 	virtual bool onTick(Time time)     override;
 
 private:
-	Surface m_drawingSurface  = Surface();
-	ToolManager m_toolManager = ToolManager();
+	Surface m_drawingSurface = Surface();
 
+	ToolManager m_toolManager = ToolManager();
 	Frame* m_toolBox = nullptr;
 	int m_toolsInRow = 0;
 	int m_toolsNow   = 0;
@@ -56,6 +59,9 @@ private:
 	Rect m_copyBounds = {0, 0, 0, 0};
 
 	Frame* m_cornerSquare = nullptr;
+
+	Color m_bgColor = white;
+	Color m_fgColor = black;
 };
 
 #endif // CANVAS_HPP

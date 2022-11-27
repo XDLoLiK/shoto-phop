@@ -1,6 +1,10 @@
 #include "brush.hpp"
 #include "app.hpp"
 
+
+extern booba::ApplicationContext* booba::APPCONTEXT;
+
+
 Brush::Brush(const std::string& icon, int x, int y):
 	Instrument(icon, x, y),
 	m_curPoint ({-1, -1}),
@@ -23,6 +27,9 @@ bool Brush::mouseLeave(Surface*, booba::Event*)
 
 bool Brush::apply(Surface* surface, booba::Event* event)
 {
+	if (booba::APPCONTEXT) {
+		m_drawColor = Color(booba::APPCONTEXT->fgColor);
+	}
 	bool res = false;
 
 	switch (event->type) {

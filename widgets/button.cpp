@@ -13,8 +13,11 @@ Button::Button(const std::string& text, int size, Widget* parent):
 	m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 	m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 
-	this->setFrameColor(Color(231, 178, 212, 255));
-	this->setBackground(Color(231, 178, 212, 255));
+	this->setDefaultTexture(Color(231, 178, 212, 255));
+	this->setHoverTexture(Color(185, 130, 183, 255));
+
+	this->setFrameColor(m_frameDefaultColor);
+	this->setBackground(m_defaultTexture);
 }
 
 Button::Button(const std::string& text, const Rect& bounds, Widget* parent):
@@ -27,14 +30,27 @@ Button::Button(const std::string& text, const Rect& bounds, Widget* parent):
 
 	m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
 
-	this->setFrameColor(Color(231, 178, 212, 255));
-	this->setBackground(Color(231, 178, 212, 255));
+	this->setDefaultTexture(Color(231, 178, 212, 255));
+	this->setHoverTexture(Color(185, 130, 183, 255));
+
+	this->setFrameColor(m_frameDefaultColor);
+	this->setBackground(m_defaultTexture);
 }
 
 Button::~Button()
 {
 	delete m_label;
 	m_label = nullptr;
+}
+
+void Button::setFrameHoverColor(const Color& color)
+{
+	m_frameHoverColor = color;
+}
+
+void Button::setFrameDefaultColor(const Color& color)
+{
+	m_frameDefaultColor = color;
 }
 
 void Button::setGeometry(const Rect& bounds)
@@ -101,13 +117,13 @@ bool Button::onMouseMove(const Vec2& point, const Vec2&)
 		return false;
 
 	if (!this->intersects(point)) {
-		this->setFrameColor(Color(231, 178, 212, 255));
-		this->setBackground(Color(231, 178, 212, 255));
+		this->setBackground(m_defaultTexture);
+		this->setFrameColor(m_frameDefaultColor);
 		return false;
 	}
 
-	this->setFrameColor(Color(185, 130, 183, 255));
-	this->setBackground(Color(185, 130, 183, 255));
+	this->setBackground(m_hoverTexture);
+	this->setFrameColor(m_frameHoverColor);
 	return true;
 }
 

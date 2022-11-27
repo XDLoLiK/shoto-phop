@@ -2,9 +2,9 @@
 #define INSTRUMENT_HPP
 
 #include "frame.hpp"
-#include "std.hpp"
+#include "tools.hpp"
 
-class Instrument
+class Instrument : public booba::Tool
 {
 public:
 	Instrument(const std::string& icon = nullptr, int x = 0, int y = 0);
@@ -25,6 +25,11 @@ public:
 
 	virtual void setIconPos(int x, int y, int w = 40, int h = 40);
 	virtual void setIconPos(const Rect& bounds);
+
+public: /* compatability */
+	virtual void apply(booba::Image* image, const booba::Event* event) {};
+	virtual const char* getTexture() {};
+	virtual void buildSetupWidget()  {};
 
 protected:
 	Frame* m_icon = nullptr;

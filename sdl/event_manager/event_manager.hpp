@@ -13,7 +13,7 @@ class ChildrenManager
 {
 public:
 	ChildrenManager();
-	~ChildrenManager();
+	virtual ~ChildrenManager();
 
 	void operator+=(Widget* widget);
 	void operator-=(Widget* widget);
@@ -24,7 +24,7 @@ public:
 
 	bool callOnKeyPress(Key key);
 	bool callOnKeyRelease(Key key);
-	bool callOnTick(Time time);
+	virtual bool callOnTick(Time time);
 
 protected:
 	std::vector<Widget*> m_widgets = {};
@@ -33,14 +33,20 @@ protected:
 class EventManager : public ChildrenManager
 {
 public:
-	EventManager();
+	EventManager(EventManager* prev = nullptr);
 	~EventManager();
+
+	EventManager& operator=(EventManager& other) = delete;
+	EventManager(EventManager& other)            = delete;
 
 	int getEvent();
 	void processEvent();
 
+	virtual bool callOnTick(Time time) override;
+
 private:
 	Event m_event = Event();
+	EventManager* m_prevManager = nullptr;
 };
 
 #endif // EVENT_MANAGER_HPP

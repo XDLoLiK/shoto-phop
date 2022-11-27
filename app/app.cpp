@@ -66,6 +66,7 @@ int App::run()
 
 		while (eventManager->getEvent()) {
 			eventManager->processEvent();
+			eventManager = __theEventManager__;
 		}
 
 		eventManager->callOnTick(this->getTime());
@@ -144,4 +145,14 @@ void App::clearHeapWidgets()
 App* getApp()
 {
 	return __theApp__;
+}
+
+EventManager* getEventManager()
+{
+	return __theEventManager__;
+}
+
+SkinManager* getSkinManager()
+{
+	return __theSkinManager__;
 }

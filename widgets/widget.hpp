@@ -8,6 +8,7 @@
 #include "skin_manager.hpp"
 
 #include "modifiers/serializable.hpp"
+#include "modifiers/skinnable.hpp"
 
 class Widget
 {
@@ -26,6 +27,8 @@ public:
 	void  operator delete [](void* memptr);
 
 	virtual void show();
+	virtual void hide();
+
 	virtual bool isHidden() const;
 	virtual void setHidden(bool val);
 
@@ -109,8 +112,8 @@ public:
 	virtual Widget* getChild(size_t pos)       override;
 
 protected:
-	EventManager  m_eventManager = EventManager();
-	EventManager* m_prevManager  = nullptr;
+	ChildrenManager m_childrenManager = ChildrenManager();
+	EventManager*   m_eventManager    = nullptr;
 
 	std::vector<Widget*> m_children = {};
 };

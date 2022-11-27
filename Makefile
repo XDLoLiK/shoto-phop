@@ -22,14 +22,15 @@ CXX_FLAGS += -D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive
 -Wswitch-default -Wswitch-enum -Wsync-nand -Wundef -Wunreachable-code -Wunused -Wuseless-cast -Wvariadic-macros\
 -Wno-literal-suffix -Wno-missing-field-initializers -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector\
 -fcheck-new -fsized-deallocation -fstack-protector -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer\
--Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE -fsanitize=address
+-Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE
 
 SDL_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+LD_FLAGS := -Wl,-export-dynamic
 
 all: prepare $(APPLICATION)
 
 $(APPLICATION): $(OBJ)
-	@$(CXX) $^ -o $@ $(CXX_FLAGS) $(SDL_FLAGS)
+	@$(CXX) $(LD_FLAGS) $^ -o $@ $(CXX_FLAGS) $(SDL_FLAGS)
 
 $(BIN_DIR)/%.o: %.cpp
 	@$(CXX) $< -c -MD -o $@ $(CXX_FLAGS) $(SDL_FLAGS)
@@ -58,3 +59,4 @@ clean:
 info:
 	@echo [*] OBJ: $(OBJ)
 	@echo [*] SRC: $(SRC)
+	@echo [*] DLL: $(DLL_FILES)
