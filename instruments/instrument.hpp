@@ -2,7 +2,7 @@
 #define INSTRUMENT_HPP
 
 #include "frame.hpp"
-#include "tools.hpp"
+#include "plugin.hpp"
 
 class Instrument : public booba::Tool
 {

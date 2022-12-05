@@ -40,6 +40,13 @@ Surface::Surface(int width, int height):
 		std::cout << SDL_GetError() << std::endl;
 }
 
+Surface::Surface(const std::string& image)
+{
+	m_realSurface = IMG_Load(image.c_str());
+	m_width  = m_realSurface->w;
+	m_height = m_realSurface->h;
+}
+
 Surface::~Surface()
 {
 	SDL_FreeSurface(m_realSurface);

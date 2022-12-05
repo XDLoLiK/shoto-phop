@@ -20,7 +20,7 @@ private:
 	std::pair<int, int> m_curPoint  = {};
 	std::pair<int, int> m_prevPoint = {};
 
-	const Color m_eraseColor = white;
+	Color m_eraseColor = white;
 	int m_brushSize = 16; /* size in pixels */
 
 	bool m_mouseIsPressed = false;

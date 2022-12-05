@@ -22,6 +22,9 @@ bool Eraser::mouseLeave(Surface*, booba::Event*)
 
 bool Eraser::apply(Surface* surface, booba::Event* event)
 {
+	if (booba::APPCONTEXT) {
+		m_eraseColor = Color(booba::APPCONTEXT->bgColor);
+	}
 	bool res = false;
 
 	switch (event->type) {

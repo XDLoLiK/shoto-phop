@@ -1,4 +1,4 @@
-SRC_DIRS := . app common sdl/textures sdl/event_manager sdl/renderer sdl/window sdl/cursor widgets signals modifiers instruments standart
+SRC_DIRS := . app common sdl/textures sdl/event_manager sdl/renderer sdl/window sdl/cursor widgets signals modifiers instruments standart user
 VPATH += $(SRC_DIRS)
 
 INC_DIRS := include

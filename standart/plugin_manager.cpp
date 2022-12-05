@@ -1,10 +1,13 @@
 #include "plugin_manager.hpp"
 #include "simple_canvas.hpp"
-#include "scrollbar.hpp"
+#include "simple_slider.hpp"
+#include "simple_button.hpp"
 #include "label.hpp"
-#include "button.hpp"
 
-PluginManager* __thePluginManager__ = nullptr;
+
+PluginManager* __thePluginManager__  = nullptr;
+booba::Tool*   __currentImportTool__ = nullptr;
+
 
 PluginManager::PluginManager()
 {
@@ -13,7 +16,6 @@ PluginManager::PluginManager()
 	}
 
 	__thePluginManager__ = this;
-	this->loadPlugins();
 }
 
 PluginManager::~PluginManager()
@@ -46,6 +48,11 @@ void PluginManager::loadPlugins()
 	}
 }
 
+std::vector<booba::Tool*>& PluginManager::getTools()
+{
+	return m_importedTools;
+}
+
 void PluginManager::addTool(booba::Tool* tool)
 {
 	m_importedTools.push_back(tool);
@@ -54,7 +61,7 @@ void PluginManager::addTool(booba::Tool* tool)
 uint64_t booba::createButton(int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text)
 {
 	Rect bounds = {x, y, w, h};
-	Button* newButton = new Button(std::string(text), bounds);
+	SimpleButton* newButton = new SimpleButton(__currentImportTool__, std::string(text), bounds);
 
 	return reinterpret_cast<uint64_t>(newButton);
 }
@@ -71,7 +78,7 @@ uint64_t booba::createLabel(int32_t x, int32_t y, uint32_t w, uint32_t h, const 
 uint64_t booba::createScrollbar(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t maxValue, int32_t startValue)
 {
 	Rect bounds = {x, y, w, h};
-	HScrollbar* newScrollbar = new HScrollbar(bounds);
+	SimpleSlider* newScrollbar = new SimpleSlider(__currentImportTool__, maxValue, startValue, bounds);
 
 	return reinterpret_cast<uint64_t>(newScrollbar);
 }
@@ -79,7 +86,7 @@ uint64_t booba::createScrollbar(int32_t x, int32_t y, uint32_t w, uint32_t h, in
 uint64_t booba::createCanvas(int32_t x, int32_t y, int32_t w, int32_t h)
 {
 	Rect bounds = {x, y, w, h};
-	SimpleCanvas* newCanvas = new SimpleCanvas(bounds);
+	SimpleCanvas* newCanvas = new SimpleCanvas(__currentImportTool__, bounds);
 
 	return reinterpret_cast<uint64_t>(newCanvas);
 }
@@ -95,8 +102,8 @@ void booba::putSprite(uint64_t canvas, int32_t x, int32_t y, uint32_t w, uint32_
 	SimpleCanvas* canvasPtr = reinterpret_cast<SimpleCanvas*>(canvas);
 
 	Rect bounds = {x, y, w, h};
-	Surface* blitSurface = new Surface(w, h);
-	
+	Surface* blitSurface = new Surface(std::string(texture));
+
 	canvasPtr->blit(blitSurface, bounds);
 }
 

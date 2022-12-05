@@ -5,9 +5,9 @@
 extern std::vector<Widget*> __heapWidgets__;
 extern std::vector<Widget*> __heapWidgetArrays__;
 
-App*          __theApp__          = nullptr;
-EventManager* __theEventManager__ = nullptr;
-SkinManager*  __theSkinManager__  = nullptr;
+App*           __theApp__           = nullptr;
+EventManager*  __theEventManager__  = nullptr;
+SkinManager*   __theSkinManager__   = nullptr;
 
 
 App::App(const std::string& name, int width, int height):
@@ -19,9 +19,9 @@ App::App(const std::string& name, int width, int height):
 		std::cout << "You can have only one App instance" << std::endl;
 		return;
 	}
-	__theApp__          = this;
-	__theEventManager__ = &this->m_eventManager;
-	__theSkinManager__  = &this->m_skinManager;
+	__theApp__           = this;
+	__theEventManager__  = &this->m_eventManager;
+	__theSkinManager__   = &this->m_skinManager;
 
 	this->initGraphics();
 

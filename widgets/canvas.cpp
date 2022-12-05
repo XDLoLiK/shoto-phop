@@ -3,6 +3,7 @@
 
 
 extern booba::ApplicationContext* booba::APPCONTEXT;
+extern booba::Tool* __currentImportTool__;
 
 
 Canvas::Canvas(const Rect& bounds, Widget* parent):
@@ -56,6 +57,15 @@ void Canvas::saveAs()
 void Canvas::open()
 {
 
+}
+
+void Canvas::addTools(std::vector<booba::Tool*>& tools)
+{
+	for (size_t i = 0; i < tools.size(); i++) {
+		__currentImportTool__ = tools[i];
+		tools[i]->buildSetupWidget();
+		// m_toolManager += tools[i];
+	}
 }
 
 void Canvas::setFGColor(const Color& newColor)

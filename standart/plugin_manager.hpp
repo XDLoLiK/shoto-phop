@@ -5,7 +5,7 @@
 #include <vector>
 #include <dlfcn.h>
 
-#include "tools.hpp"
+#include "plugin.hpp"
 
 class Canvas;
 
@@ -17,6 +17,8 @@ public:
 
 	void loadPlugins();
 	void addTool(booba::Tool* tool);
+
+	std::vector<booba::Tool*>& getTools();
 
 private:
 	std::vector<booba::Tool*> m_importedTools = std::vector<booba::Tool*>(0);

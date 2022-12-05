@@ -8,7 +8,7 @@
 
 #include "rect.hpp"
 #include "color.hpp"
-#include "tools.hpp"
+#include "plugin.hpp"
 
 #define SURFACE_SIZE_MIN 1
 
@@ -17,6 +17,7 @@ class Surface : public booba::Image
 public:
 	Surface(SDL_Surface* realSurface);
 	Surface(int width = 0, int height = 0);
+	Surface(const std::string& image);
 	~Surface();
 
 	Surface& operator=(const Surface& other) = delete;

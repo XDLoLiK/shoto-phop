@@ -13,6 +13,9 @@ Bucket::~Bucket()
 
 bool Bucket::apply(Surface* surface, booba::Event* event)
 {
+	if (booba::APPCONTEXT) {
+		m_fillColor = Color(booba::APPCONTEXT->fgColor);
+	}
 	bool res = false;
 
 	switch (event->type) {

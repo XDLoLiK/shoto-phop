@@ -22,6 +22,7 @@ public:
 
 	void addToolBox(Frame* toolBox);
 	void addTool(Instrument* tool);
+	void addTools(std::vector<booba::Tool*>& tools);
 
 	void save();
 	void saveAs();

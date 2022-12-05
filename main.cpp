@@ -1,23 +1,7 @@
-#include "app.hpp"
-#include "button.hpp"
-#include "frame.hpp"
-#include "canvas.hpp"
-#include "brush.hpp"
-#include "bucket.hpp"
-#include "eraser.hpp"
-#include "revealer.hpp"
-#include "drop_list.hpp"
-#include "context_button.hpp"
-#include "dynamic_window.hpp"
-#include "plugin_manager.hpp"
-#include "color_chooser.hpp"
+#include "main.hpp"
 
+/* Global variable needed for plugins */
 booba::ApplicationContext* booba::APPCONTEXT = nullptr;
-
-void showWin(DynamicWindow* win)
-{
-	win->show();
-}
 
 int main()
 {
@@ -41,8 +25,9 @@ int main()
 	menuFrame.setFrameColor(Color(251, 224, 243, 140));
 	menuFrame.show();
 
-	Button closeButton("Exit", {0, 0, 100, 52});
-	closeButton.buttonClick += METHOD(app, App::close);
+	ContextButton<App> closeButton("Exit", {0, 0, 100, 52});
+	closeButton.setContext(&app);
+	closeButton.setAction(closeApp);
 	closeButton.show();
 
 	DropList fileList("File", {100, 0, 100, 52});
@@ -60,10 +45,15 @@ int main()
 	openButton.buttonClick += METHOD(canvas, Canvas::open);
 	fileList.addEntry(&openButton);
 
-	DynamicWindow* colorChoiseWin = new DynamicWindow({100, 100, 600, 600});
-	
-	ColorPicker test({100, 100, 400, 400});
-	test.show();
+	DynamicWindow* colorChoiseWin = new DynamicWindow({100, 100, 600, 400});
+	colorChoiseWin->setBackground(Color(251, 224, 243, 140));
+	ColorPicker colorPicker({0, 0, 400, 400}, colorChoiseWin);
+
+	ContextButton<ColorPicker> colorChooseButton("Choose", {410, 140, 180, 60}, colorChoiseWin);
+	colorChooseButton.setContext(&colorPicker);
+	colorChooseButton.setAction(pickColor);
+	colorChooseButton.setDefaultTexture(Color(251, 224, 243, 140));
+	colorChooseButton.setHoverTexture(Color(251, 224, 243, 140));
 
 	ContextButton<DynamicWindow> colorButton("Color", {200, 0, 100, 52});
 	colorButton.setContext(colorChoiseWin);
@@ -88,6 +78,7 @@ int main()
 
 	PluginManager pluginManager;
 	pluginManager.loadPlugins();
+	canvas.addTools(pluginManager.getTools());
 
 	return app.run();
 }

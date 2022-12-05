@@ -83,7 +83,6 @@ void Renderer::setDrawColor(const Color& color)
 void Renderer::copyTexture(const Texture* texture, const Rect& dest, const Rect& src)
 {
 	if (!texture) {
-		std::cout << "No texture provided" << std::endl;
 		return;
 	}
 

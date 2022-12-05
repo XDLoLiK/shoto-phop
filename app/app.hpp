@@ -29,10 +29,10 @@ public:
 	Renderer* getRenderer();
 
 private:
-	SkinManager  m_skinManager  = SkinManager();
-	EventManager m_eventManager = EventManager();
-	Window       m_window       = Window();
-	Renderer     m_renderer     = Renderer();
+	SkinManager   m_skinManager   = SkinManager();
+	EventManager  m_eventManager  = EventManager();
+	Window        m_window        = Window();
+	Renderer      m_renderer      = Renderer();
 
 private:
 	std::string m_name = "";
@@ -45,6 +45,6 @@ private:
 
 App* getApp();
 EventManager* getEventManager();
-SkinManager*  getSkinManager ();
+SkinManager* getSkinManager();
 
 #endif // APP_HPP

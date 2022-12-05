@@ -9,16 +9,21 @@
 class Framable
 {
 public:
-	Framable(const Color& color = {0, 0, 0, 0});
+	Framable();
 	virtual ~Framable();
 
-	void setFrameColor(const Color& color);
+	void setFrameColor       (const Color& color);
+	void setFrameColorDefault(const Color& color);
+	void setFrameColorHover  (const Color& color);
 
 protected:
-	void drawFrame(const Rect& bounds);
+	void drawFrame(const Rect& bounds, bool isHovered = false);
 
 protected:
-	Color m_frameColor = {0, 0, 0, 0};
+	bool m_colorChanged = true;
+
+	Color m_frameColorDefault = {0, 0, 0, 0};
+	Color m_frameColorHover   = {0, 0, 0, 0};
 };
 
 #endif // FRAMABLE_HPP
