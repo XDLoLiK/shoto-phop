@@ -1,21 +1,18 @@
 #include "plugin_manager.hpp"
-#include "simple_canvas.hpp"
-#include "simple_slider.hpp"
-#include "simple_button.hpp"
-#include "label.hpp"
 
 
-PluginManager* __thePluginManager__  = nullptr;
-booba::Tool*   __currentImportTool__ = nullptr;
+booba::Tool* __currentImportTool__ = nullptr;
 
 
 PluginManager::PluginManager()
 {
-	if (__thePluginManager__) {
-		return;
-	}
 
-	__thePluginManager__ = this;
+}
+
+PluginManager* PluginManager::getPluginManager()
+{
+	static PluginManager instance;
+	return &instance;
 }
 
 PluginManager::~PluginManager()
@@ -25,6 +22,9 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins()
 {
+	static bool wasCalled = false;
+	if (wasCalled) return;
+
 	const std::string src = "./plugins";
 
 	for (const auto& file : std::filesystem::directory_iterator(src)) {
@@ -46,6 +46,8 @@ void PluginManager::loadPlugins()
 
 		pluginInit();
 	}
+
+	wasCalled = true;
 }
 
 std::vector<booba::Tool*>& PluginManager::getTools()
@@ -56,6 +58,16 @@ std::vector<booba::Tool*>& PluginManager::getTools()
 void PluginManager::addTool(booba::Tool* tool)
 {
 	m_importedTools.push_back(tool);
+}
+
+void booba::addTool(booba::Tool* tool)
+{
+	PluginManager::getPluginManager()->addTool(tool);
+}
+
+void booba::addFilter(booba::Tool* tool)
+{
+	PluginManager::getPluginManager()->addTool(tool);
 }
 
 uint64_t booba::createButton(int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text)
@@ -105,14 +117,4 @@ void booba::putSprite(uint64_t canvas, int32_t x, int32_t y, uint32_t w, uint32_
 	Surface* blitSurface = new Surface(std::string(texture));
 
 	canvasPtr->blit(blitSurface, bounds);
-}
-
-void booba::addTool(booba::Tool* tool)
-{
-	__thePluginManager__->addTool(tool);
-}
-
-void booba::addFilter(booba::Tool* tool)
-{
-	__thePluginManager__->addTool(tool);
 }

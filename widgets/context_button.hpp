@@ -10,7 +10,7 @@
 #include "modifiers/hoverable.hpp"
 
 template <class Context>
-class ContextButton : public Widget, public Framable, public Skinnable, public Hoverable
+class ContextButton : public Widget, public Framable, public Skinnable
 {
 public:
 	ContextButton(const std::string& text = "", int size = 0, Widget* parent = nullptr):
@@ -21,8 +21,10 @@ public:
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 
-		this->setDefaultTexture(Color(231, 178, 212, 255));
-		this->setHoverTexture(Color(185, 130, 183, 255));
+		this->setBackgroundDefault(Color(231, 178, 212, 255));
+		this->setBackgroundHover(Color(185, 130, 183, 255));
+		this->setFrameColorDefault(Color(231, 178, 212, 255));
+		this->setFrameColorHover(Color(185, 130, 183, 255));
 	}
 
 	ContextButton(const std::string& text, const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr):
@@ -35,8 +37,10 @@ public:
 
 		m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
 
-		this->setDefaultTexture(Color(231, 178, 212, 255));
-		this->setHoverTexture(Color(185, 130, 183, 255));
+		this->setBackgroundDefault(Color(231, 178, 212, 255));
+		this->setBackgroundHover(Color(185, 130, 183, 255));
+		this->setFrameColorDefault(Color(231, 178, 212, 255));
+		this->setFrameColorHover(Color(185, 130, 183, 255));
 	}
 
 	virtual ~ContextButton()
@@ -94,8 +98,8 @@ public:
 		if (m_isHidden)
 			return;
 
-		drawSkin (m_bounds);
-		drawFrame(m_bounds);
+		drawSkin (m_bounds, m_isHovered);
+		drawFrame(m_bounds, m_isHovered);
 
 		m_label->draw();
 	}
@@ -124,13 +128,11 @@ public:
 			return false;
 
 		if (!this->intersects(point)) {
-			this->setBackground(m_defaultTexture);
-			this->setFrameColor(m_frameColorDefault);
+			m_isHovered = false;
 			return false;
 		}
 
-		this->setBackground(m_hoverTexture);
-		this->setFrameColor(m_frameColorHover);
+		m_isHovered = true;
 		return true;
 	}
 

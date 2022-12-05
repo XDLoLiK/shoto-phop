@@ -2,12 +2,14 @@
 #include "widget.hpp"
 
 
+/* Global variable needed for plugins */
+booba::ApplicationContext* booba::APPCONTEXT = nullptr;
+
 extern std::vector<Widget*> __heapWidgets__;
 extern std::vector<Widget*> __heapWidgetArrays__;
 
 App*           __theApp__           = nullptr;
 EventManager*  __theEventManager__  = nullptr;
-SkinManager*   __theSkinManager__   = nullptr;
 
 
 App::App(const std::string& name, int width, int height):
@@ -21,7 +23,6 @@ App::App(const std::string& name, int width, int height):
 	}
 	__theApp__           = this;
 	__theEventManager__  = &this->m_eventManager;
-	__theSkinManager__   = &this->m_skinManager;
 
 	this->initGraphics();
 
@@ -31,7 +32,12 @@ App::App(const std::string& name, int width, int height):
 
 	m_renderer.setRenderTarget(&m_window);
 
-	m_skinManager.loadDeafultSkins();
+	booba::APPCONTEXT = new booba::ApplicationContext();
+	booba::APPCONTEXT->fgColor = black.mapRGBA();
+	booba::APPCONTEXT->bgColor = white.mapRGBA();
+
+	SkinManager::getSkinManager()->loadDeafultSkins();
+	PluginManager::getPluginManager()->loadPlugins();
 }
 
 App::~App()
@@ -39,6 +45,8 @@ App::~App()
 	this->close();
 	this->destroyGraphics();
 	this->clearHeapWidgets();
+
+	delete booba::APPCONTEXT;
 
 	__theApp__ = nullptr;
 }
@@ -102,11 +110,13 @@ void App::delay(Time time)
 
 bool App::initGraphics()
 {
+	/* Init SDL */
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		std::cout << SDL_GetError() << std::endl;
 		return false;
 	}
 
+	/* Init SDL_image */
 	int flags     = IMG_INIT_JPG | IMG_INIT_PNG;
 	int initFlags = IMG_Init(flags);
 
@@ -115,6 +125,7 @@ bool App::initGraphics()
 		return false;
 	}
 
+	/* Init SDL_ttf */
 	TTF_Init();
 
 	return true;
@@ -122,9 +133,9 @@ bool App::initGraphics()
 
 void App::destroyGraphics()
 {
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
-	TTF_Quit();
 }
 
 void App::clearHeapWidgets()
@@ -150,9 +161,4 @@ App* getApp()
 EventManager* getEventManager()
 {
 	return __theEventManager__;
-}
-
-SkinManager* getSkinManager()
-{
-	return __theSkinManager__;
 }

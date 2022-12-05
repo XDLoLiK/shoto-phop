@@ -5,6 +5,12 @@ SkinManager::SkinManager()
 
 }
 
+SkinManager* SkinManager::getSkinManager()
+{
+	static SkinManager instance;
+	return &instance;
+}
+
 SkinManager::~SkinManager()
 {
 	for (auto entry : m_textures)

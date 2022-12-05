@@ -32,6 +32,9 @@ public:
 	virtual bool isHidden() const;
 	virtual void setHidden(bool val);
 
+	virtual bool isHovered() const;
+	virtual void setHovered(bool val);
+
 	virtual bool isClicked() const;
 	virtual void setClicked(bool val);
 
@@ -70,6 +73,7 @@ protected:
 	Widget* m_parent = nullptr;
 
 	bool m_isHidden   = true;
+	bool m_isHovered  = false;
 	bool m_isClicked  = false;
 	bool m_isHolded   = false;
 	bool m_isInFocuse = false;

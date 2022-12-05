@@ -9,8 +9,11 @@
 
 class SkinManager
 {
-public:
+private:
 	SkinManager();
+
+public:
+	static SkinManager* getSkinManager();
 	~SkinManager();
 
 	const Texture* loadSkin (const std::string& path);

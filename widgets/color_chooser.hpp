@@ -7,7 +7,7 @@
 
 #include "modifiers/framable.hpp"
 
-class ColorPicker : public Widget, public Framable
+class ColorPicker : public Widget, public Framable, public Skinnable
 {
 public:
 	ColorPicker(const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);

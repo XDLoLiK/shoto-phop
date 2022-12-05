@@ -1,11 +1,6 @@
 #include "canvas.hpp"
 #include "app.hpp"
 
-
-extern booba::ApplicationContext* booba::APPCONTEXT;
-extern booba::Tool* __currentImportTool__;
-
-
 Canvas::Canvas(const Rect& bounds, Widget* parent):
 	ContainerWidget(bounds, parent)
 {
@@ -24,11 +19,6 @@ Canvas::Canvas(const Rect& bounds, Widget* parent):
 	m_cornerSquare->setBackground(Color(102, 102, 102, 255));
 	m_cornerSquare->setFrameColor(Color(102, 102, 102, 255));
 	m_cornerSquare->show();
-
-	if (booba::APPCONTEXT) {
-		m_fgColor = Color(booba::APPCONTEXT->fgColor);
-		m_bgColor = Color(booba::APPCONTEXT->bgColor);
-	}
 }
 
 Canvas::~Canvas()
@@ -57,52 +47,6 @@ void Canvas::saveAs()
 void Canvas::open()
 {
 
-}
-
-void Canvas::addTools(std::vector<booba::Tool*>& tools)
-{
-	for (size_t i = 0; i < tools.size(); i++) {
-		__currentImportTool__ = tools[i];
-		tools[i]->buildSetupWidget();
-		// m_toolManager += tools[i];
-	}
-}
-
-void Canvas::setFGColor(const Color& newColor)
-{
-	m_fgColor = newColor;
-}
-
-void Canvas::setBGColor(const Color& newColor)
-{
-	m_bgColor = newColor;
-}
-
-void Canvas::addTool(Instrument* tool)
-{
-	m_toolsNow++;
-
-	int curRows    = m_toolsNow / m_toolsInRow;
-	int curColumns = m_toolsNow % m_toolsInRow;
-
-	const Rect& boxBounds = m_toolBox->getBounds();
-	int x = boxBounds.x + 40 + 80 * (curColumns - 1);
-	int y = boxBounds.y + 40 + 80 *  curRows;
-
-	int w = 40;
-	int h = 40;
-
-	tool->setIconPos(x, y, w, h);
-
-	m_toolManager += tool;
-}
-
-void Canvas::addToolBox(Frame* toolBox)
-{
-	m_toolBox = toolBox;
-	
-	const Rect& boxBounds = m_toolBox->getBounds();
-	m_toolsInRow = (boxBounds.w - 40) / 40;
 }
 
 void Canvas::draw()
@@ -140,9 +84,7 @@ bool Canvas::onMouseMove(const Vec2& point, const Vec2& motion)
 	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
 
 	bool res = false;
-	if (this->intersects(point)) res &= m_toolManager.reactToMouseMove (m_drawingSurface, relPoint, motion);
-	else                         res &= m_toolManager.reactToMouseLeave(m_drawingSurface, relPoint, motion);
-
+	res &= ToolManager::getToolManager()->reactToMouseMove (m_drawingSurface, relPoint, motion);
 	res &= m_childrenManager.callOnMouseMove(point, motion);
 
 	return res;
@@ -150,10 +92,8 @@ bool Canvas::onMouseMove(const Vec2& point, const Vec2& motion)
 
 bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 {
-	bool res = m_toolManager.changeTool(button, point);
-
 	if (m_isHidden || !this->intersects(point))
-		return res;
+		return false;
 
 	size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
 	size_t sizeofPixel  = sizeof (Color);
@@ -166,7 +106,9 @@ bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 		m_prevStates.pop_front();
 
 	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
-	res &= m_toolManager.reactToButtonClick(m_drawingSurface, button, relPoint);
+
+	bool res = false;
+	res &= ToolManager::getToolManager()->reactToButtonClick(m_drawingSurface, button, relPoint);
 	res &= m_childrenManager.callOnButtonClick(button, point);
 
 	return res;
@@ -178,7 +120,7 @@ bool Canvas::onButtonRelease(MouseButton button, const Vec2& point)
 		return false;
 
 	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
-	bool res = m_toolManager.reactToButtonRelease(m_drawingSurface, button, relPoint);
+	bool res = ToolManager::getToolManager()->reactToButtonRelease(m_drawingSurface, button, relPoint);
 	res &= m_childrenManager.callOnButtonRelease(button, point);
 
 	return res;
@@ -189,7 +131,7 @@ bool Canvas::onKeyPress(Key key)
 	if (m_isHidden)
 		return false;
 
-	bool res = m_toolManager.reactToKeyPress(m_drawingSurface, key);
+	bool res = ToolManager::getToolManager()->reactToKeyPress(m_drawingSurface, key);
 	res &= m_childrenManager.callOnKeyPress(key);
 
 	if (key == SDLK_LCTRL) {
@@ -221,7 +163,7 @@ bool Canvas::onKeyRelease(Key key)
 	if (m_isHidden)
 		return false;
 
-	bool res = m_toolManager.reactToKeyRelease(m_drawingSurface, key);
+	bool res = ToolManager::getToolManager()->reactToKeyRelease(m_drawingSurface, key);
 	res &= m_childrenManager.callOnKeyRelease(key);
 
 	if (key == SDLK_LCTRL) {
@@ -241,7 +183,7 @@ bool Canvas::onTick(Time time)
 	int   newY = static_cast<int>(maxY * m_verticalBar->getValue());
 	m_copyBounds.y = newY;
 
-	bool res = m_toolManager.reactToTick(m_drawingSurface, time);
+	bool res = ToolManager::getToolManager()->reactToTick(m_drawingSurface, time);
 	res &= m_childrenManager.callOnTick(time);
 
 	if (m_isHidden)

@@ -20,16 +20,9 @@ public:
 	Canvas& operator=(Canvas&) = delete;
 	Canvas(Canvas&)            = delete;
 
-	void addToolBox(Frame* toolBox);
-	void addTool(Instrument* tool);
-	void addTools(std::vector<booba::Tool*>& tools);
-
 	void save();
 	void saveAs();
 	void open();
-
-	void setFGColor(const Color& newColor);
-	void setBGColor(const Color& newColor);
 
 public:
 	virtual void draw()                        override;
@@ -46,23 +39,16 @@ public:
 private:
 	Surface m_drawingSurface = Surface();
 
-	ToolManager m_toolManager = ToolManager();
-	Frame* m_toolBox = nullptr;
-	int m_toolsInRow = 0;
-	int m_toolsNow   = 0;
-
+	/* Cancel actions */
 	size_t m_maxStates = 32;
 	bool m_ctrlPressed = false;
-	std::deque <Color*> m_prevStates = {};
+	std::deque<Color*> m_prevStates = {};
 
+	/* Periphery */
+	Frame*      m_cornerSquare  = nullptr;
 	HScrollbar* m_horizontalBar = nullptr;
 	VScrollbar* m_verticalBar   = nullptr;
 	Rect m_copyBounds = {0, 0, 0, 0};
-
-	Frame* m_cornerSquare = nullptr;
-
-	Color m_bgColor = white;
-	Color m_fgColor = black;
 };
 
 #endif // CANVAS_HPP

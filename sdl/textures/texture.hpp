@@ -11,6 +11,8 @@
 #include "plugin.hpp"
 
 #define SURFACE_SIZE_MIN 1
+#define NO_SKIN "skins/missing_texture.png"
+#define NO_FRAME white
 
 class Surface : public booba::Image
 {

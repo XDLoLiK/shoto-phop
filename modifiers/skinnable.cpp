@@ -66,7 +66,7 @@ void Skinnable::setBackground(const std::string& name)
 {
 	this->destroyTextures();
 
-	SkinManager* skm = getSkinManager();
+	SkinManager* skm = SkinManager::getSkinManager();
 	const Texture* skin = skm->getSkinByName(name);
 	if (!skin) skin = skm->loadSkin(name);
 	if (!skin) return;
@@ -106,7 +106,7 @@ void Skinnable::setBackgroundDefault(const std::string& name)
 {
 	this->destroyTextureDefault();
 
-	SkinManager* skm = getSkinManager();
+	SkinManager* skm = SkinManager::getSkinManager();
 	const Texture* skin = skm->getSkinByName(name);
 	if (!skin) skin = skm->loadSkin(name);
 	if (!skin) return;
@@ -142,7 +142,7 @@ void Skinnable::setBackgroundHover(const std::string& name)
 {
 	this->destroyTextureHover();
 
-	SkinManager* skm = getSkinManager();
+	SkinManager* skm = SkinManager::getSkinManager();
 	const Texture* skin = skm->getSkinByName(name);
 	if (!skin) skin = skm->loadSkin(name);
 	if (!skin) return;

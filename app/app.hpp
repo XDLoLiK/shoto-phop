@@ -6,6 +6,7 @@
 
 #include "event_manager.hpp"
 #include "skin_manager.hpp"
+#include "plugin_manager.hpp"
 
 class App
 {
@@ -29,7 +30,6 @@ public:
 	Renderer* getRenderer();
 
 private:
-	SkinManager   m_skinManager   = SkinManager();
 	EventManager  m_eventManager  = EventManager();
 	Window        m_window        = Window();
 	Renderer      m_renderer      = Renderer();
@@ -45,6 +45,5 @@ private:
 
 App* getApp();
 EventManager* getEventManager();
-SkinManager* getSkinManager();
 
 #endif // APP_HPP

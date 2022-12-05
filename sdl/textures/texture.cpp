@@ -1,10 +1,6 @@
 #include "app.hpp"
 #include "texture.hpp"
 
-
-extern App* __theApp__;
-
-
 Surface::Surface(SDL_Surface* realSurface):
 	m_realSurface(realSurface)
 {
@@ -109,7 +105,7 @@ SDL_Surface* Surface::getRealSurface() const
 Texture::Texture(const Surface& pixmap)
 {
 	SDL_Surface*  realSurface  = pixmap.getRealSurface(); 
-	SDL_Renderer* realRenderer = __theApp__->getRenderer()->getRealRenderer();
+	SDL_Renderer* realRenderer = getApp()->getRenderer()->getRealRenderer();
 
 	m_realTexture = SDL_CreateTextureFromSurface(realRenderer, realSurface);
 	m_bounds = {0, 0, pixmap.getWidth(), pixmap.getHeight()};
@@ -118,10 +114,12 @@ Texture::Texture(const Surface& pixmap)
 Texture::Texture(const std::string& img)
 {
 	SDL_Surface* image = IMG_Load(img.c_str());
-	if (!image)
+	if (!image) {
 		std::cout << IMG_GetError() << std::endl;
+		image = IMG_Load(NO_SKIN);
+	}
 
-	SDL_Renderer* realRenderer = __theApp__->getRenderer()->getRealRenderer();
+	SDL_Renderer* realRenderer = getApp()->getRenderer()->getRealRenderer();
 
 	m_realTexture = SDL_CreateTextureFromSurface(realRenderer, image);
 	m_bounds = {0, 0, image->w, image->h};
@@ -147,7 +145,7 @@ Texture::Texture(const std::string& text, int size,
 	SDL_Color realColor = {color.r, color.g, color.b, color.a};
 	SDL_Surface* message = TTF_RenderText_Blended(font, text.c_str(), realColor); 
 
-	SDL_Renderer* realRenderer = __theApp__->getRenderer()->getRealRenderer();
+	SDL_Renderer* realRenderer = getApp()->getRenderer()->getRealRenderer();
 
 	m_realTexture = SDL_CreateTextureFromSurface(realRenderer, message);
 	m_bounds = {0, 0, message->w, message->h};

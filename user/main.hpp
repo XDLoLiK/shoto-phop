@@ -12,6 +12,7 @@
 #include "context_button.hpp"
 #include "dynamic_window.hpp"
 #include "color_chooser.hpp"
+#include "toolbar.hpp"
 
 /* Tools */
 #include "brush.hpp"

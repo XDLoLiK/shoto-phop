@@ -75,6 +75,16 @@ void Widget::setHidden(bool val)
 	m_isHidden = val;
 }
 
+bool Widget::isHovered() const
+{
+	return m_isHovered;
+}
+
+void Widget::setHovered(bool val)
+{
+	m_isHovered = val;
+}
+
 bool Widget::isHolded() const
 {
 	return m_isHolded;

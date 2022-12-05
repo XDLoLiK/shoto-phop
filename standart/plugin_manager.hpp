@@ -6,13 +6,20 @@
 #include <dlfcn.h>
 
 #include "plugin.hpp"
+#include "simple_canvas.hpp"
+#include "simple_slider.hpp"
+#include "simple_button.hpp"
+#include "label.hpp"
 
 class Canvas;
 
 class PluginManager
 {
-public:
+private:
 	PluginManager();
+
+public:
+	static PluginManager* getPluginManager();
 	~PluginManager();
 
 	void loadPlugins();
