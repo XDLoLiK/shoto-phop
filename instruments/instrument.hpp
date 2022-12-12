@@ -27,9 +27,9 @@ public:
 	virtual void setIconPos(const Rect& bounds);
 
 public: /* compatability */
-	virtual void apply(booba::Image* image, const booba::Event* event) {};
-	virtual const char* getTexture() {};
-	virtual void buildSetupWidget()  {};
+	virtual void apply(booba::Image*, const booba::Event*) = 0;
+	virtual const char* getTexture() = 0;
+	virtual void buildSetupWidget()  = 0;
 
 protected:
 	Frame* m_icon = nullptr;

@@ -1,28 +1,28 @@
 #include "bucket.hpp"
 
-Bucket::Bucket(const std::string& icon, int x, int y):
-	Instrument(icon, x, y)
+
+extern booba::ApplicationContext* booba::APPCONTEXT;
+const char texture[] = "bucket.png";
+
+
+BucketTool::BucketTool()
 {
 
 }
 
-Bucket::~Bucket()
+BucketTool::~BucketTool()
 {
 
 }
 
-bool Bucket::apply(Surface* surface, booba::Event* event)
+void BucketTool::apply(booba::Image* image, const booba::Event* event)
 {
-	if (booba::APPCONTEXT) {
-		m_fillColor = Color(booba::APPCONTEXT->fgColor);
-	}
-	bool res = false;
+	m_fillColor = booba::APPCONTEXT->fgColor;
 
 	switch (event->type) {
 		case booba::EventType::MouseReleased:
-			this->fill(surface, {event->Oleg.mbedata.x, event->Oleg.mbedata.y});
-
-			res = true;
+			this->fill(image, {static_cast<int>(event->Oleg.mbedata.x), 
+				               static_cast<int>(event->Oleg.mbedata.y)});
 			break;
 
 		case booba::EventType::NoEvent:
@@ -37,18 +37,25 @@ bool Bucket::apply(Surface* surface, booba::Event* event)
 		default:
 			break;
 	}
-
-	return res;
 }
 
-void Bucket::fill(Surface* surface, std::pair<int, int> point)
+const char* BucketTool::getTexture() 
 {
-	int width  = 0;
-	int height = 0;
-	Color* pixmap = surface->getPixmap(&width, &height);
+	return texture;
+}
+
+void BucketTool::buildSetupWidget()
+{
+
+}
+
+void BucketTool::fill(booba::Image* image, const std::pair<int, int>& point)
+{
+	int width  = static_cast<int>(image->getW());
+	int height = static_cast<int>(image->getH());
 
 	int startPoint = point.second * width + point.first;
-	Color bgColor  = pixmap[startPoint];
+	uint32_t bgColor = image->getPixel(point.first, point.second);
 
 	std::unordered_set<int> visited = {};
 	std::queue<int> bfs = {};
@@ -64,9 +71,9 @@ void Bucket::fill(Surface* surface, std::pair<int, int> point)
 		int curY = current / width;
 
 		if (curX >= 0 && curX < width && curY >= 0 && curY < height && 
-			pixmap[width * curY + curX] == bgColor)
+			image->getPixel(curX, curY) == bgColor)
 		{
-			pixmap[width * curY + curX] = m_fillColor;
+			image->setPixel(curX, curY, m_fillColor);
 		}
 		else {
 			continue;
@@ -87,15 +94,14 @@ void Bucket::fill(Surface* surface, std::pair<int, int> point)
 	}
 }
 
-void Bucket::fastFill(Surface* surface, std::pair<int, int> point)
+void BucketTool::fastFill(booba::Image* image, const std::pair<int, int>& point)
 {
-	int width  = 0;
-	int height = 0;
-	Color* pixmap = surface->getPixmap(&width, &height);
+	int width  = static_cast<int>(image->getW());
+	int height = static_cast<int>(image->getH());
 
 	int x = point.first;
 	int y = point.second;
-	const Color bgColor  = pixmap[y * width + x];
+	const uint32_t bgColor = image->getPixel(x, y);
 
 	std::queue<int> queue = {};
 	
@@ -124,9 +130,9 @@ void Bucket::fastFill(Surface* surface, std::pair<int, int> point)
 
 		x = x1;
 
-		if (pixmap[width * y + x] == bgColor) {
-			while (pixmap[width * y + x - 1] == bgColor) {
-				pixmap[width * y + (x - 1)] = m_fillColor;
+		if (image->getPixel(x, y) == bgColor) {
+			while (image->getPixel(x, y) == bgColor) {
+				image->setPixel(x - 1, y, m_fillColor);
 				x--;
 			}
 		}
@@ -139,8 +145,8 @@ void Bucket::fastFill(Surface* surface, std::pair<int, int> point)
 		}
 
 		while (x1 <= x2) {
-			while (pixmap[width * y + x1] == bgColor) {
-				pixmap[width * y + x1] = m_fillColor;
+			while (image->getPixel(x1, y) == bgColor) {
+				image->setPixel(x1, y, m_fillColor);
 				x1++;
 
 				queue.push(x);
@@ -158,7 +164,7 @@ void Bucket::fastFill(Surface* surface, std::pair<int, int> point)
 
 			x1++;
 
-			while (x1 < x2 && pixmap[width * y + x1] != bgColor) {
+			while (x1 < x2 && image->getPixel(x1, y) != bgColor) {
 				x1++;
 			}
 
@@ -166,3 +172,10 @@ void Bucket::fastFill(Surface* surface, std::pair<int, int> point)
 		}
 	}
 }
+
+void booba::init_module()
+{
+    BucketTool* bucketTool = new BucketTool();
+    booba::addTool(bucketTool);
+}
+

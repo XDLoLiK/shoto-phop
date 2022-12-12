@@ -81,6 +81,10 @@ bool SimpleButton::onButtonRelease(MouseButton button, const Vec2& point)
 		return false;
 	}
 
+	if (!m_connectedTool) {
+		return false;
+	}
+
 	booba::Event genEvent = {};
 	genEvent.type = booba::EventType::ButtonClicked;
 	genEvent.Oleg.bcedata.id = reinterpret_cast<uint64_t>(this);

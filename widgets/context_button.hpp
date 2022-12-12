@@ -93,7 +93,7 @@ public:
 		this->setGeometry({x, y, w, h});
 	}
 
-	virtual void draw()
+	virtual void draw() override
 	{
 		if (m_isHidden)
 			return;
@@ -104,7 +104,7 @@ public:
 		m_label->draw();
 	}
 
-	virtual bool intersects(const Vec2& point)
+	virtual bool intersects(const Vec2& point) override
 	{
 		if (point.getX() < m_bounds.x || 
 			point.getX() > m_bounds.x + m_bounds.w)
@@ -122,7 +122,7 @@ public:
 	}
 
 public:
-	virtual bool onMouseMove(const Vec2& point, const Vec2& motion) override
+	virtual bool onMouseMove(const Vec2& point, const Vec2&) override
 	{
 		if (m_isHidden)
 			return false;
@@ -136,7 +136,7 @@ public:
 		return true;
 	}
 
-	virtual bool onButtonClick(MouseButton button, const Vec2& point) override
+	virtual bool onButtonClick(MouseButton, const Vec2&) override
 	{
 		if (m_isHidden)
 			return false;
@@ -155,7 +155,7 @@ public:
 		return true;
 	}
 
-	virtual bool onKeyPress(Key key) override
+	virtual bool onKeyPress(Key) override
 	{
 		if (m_isHidden)
 			return false;
@@ -163,7 +163,7 @@ public:
 		return false;
 	}
 
-	virtual bool onKeyRelease(Key key) override
+	virtual bool onKeyRelease(Key) override
 	{
 		if (m_isHidden)
 			return false;
@@ -171,7 +171,7 @@ public:
 		return false;
 	}
 
-	virtual bool onTick(Time time) override
+	virtual bool onTick(Time) override
 	{
 		if (m_isHidden)
 			return false;

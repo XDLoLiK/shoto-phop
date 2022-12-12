@@ -72,12 +72,13 @@ bool SimpleSlider::onMouseMove(const Vec2& point, const Vec2& motion)
 	double rel = static_cast<double>(m_slider->getBounds().x) / static_cast<double>(maxX);
 	int val = rel * m_maxValue;
 
-	booba::Event genEvent = {};
-	genEvent.type = booba::EventType::ScrollbarMoved;
-	genEvent.Oleg.smedata.id    = reinterpret_cast<uint64_t>(this);
-	genEvent.Oleg.smedata.value = val;
-
-	m_connectedTool->apply(nullptr, &genEvent);
+	if (m_connectedTool) {
+		booba::Event genEvent = {};
+		genEvent.type = booba::EventType::SliderMoved;
+		genEvent.Oleg.smedata.id    = reinterpret_cast<uint64_t>(this);
+		genEvent.Oleg.smedata.value = val;
+		m_connectedTool->apply(nullptr, &genEvent);
+	}
 
 	return res;
 }

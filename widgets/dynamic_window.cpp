@@ -4,24 +4,24 @@
 DynamicWindow::DynamicWindow(const Rect& bounds, Widget* parent):
 	ContainerWidget(bounds, parent)
 {
-	this->setBackground(white);
-
-	m_bounds.h     = std::max(20, m_bounds.h);
-	int menuHeight = std::max(20, m_bounds.h / 40);
-	m_topMenu = new Frame(Rect(0, -menuHeight, m_bounds.w, menuHeight), this);
+	m_bounds.w = std::max(MIN_WIN_WIDTH,  m_bounds.w);
+	m_bounds.h = std::max(MIN_WIN_HEIGHT, m_bounds.h);
+	int menuHeight = std::max(MIN_WIN_HEIGHT, m_bounds.h / 40);
+	m_topMenu = new Frame(Rect(0, 0, m_bounds.w, menuHeight), this);
 	m_topMenu->setHidden(false);
 
 	int buttonWidth = menuHeight;
-	int buttonX     = m_bounds.w - buttonWidth;
-	m_closeButton = new Button("", Rect(buttonX, -menuHeight, buttonWidth, menuHeight), this);
+	int buttonX = m_bounds.w - buttonWidth;
+	m_closeButton = new Button("", Rect(buttonX, 0, buttonWidth, menuHeight), this);
 
 	m_closeButton->setDefaultTexture("./skins/red_cross.png");
 	m_closeButton->setHoverTexture("./skins/red_cross.png");
-
 	m_closeButton->setFrameDefaultColor(backgroundGrey);
 	m_closeButton->setFrameHoverColor(backgroundGrey);
-
 	m_closeButton->setHidden(false);
+
+	m_bounds.y += menuHeight;
+	this->setBackground(white);
 }
 
 DynamicWindow::~DynamicWindow()
@@ -38,10 +38,6 @@ void DynamicWindow::show()
 	EventManager* manager = getEventManager();
 	*manager += this;
 	m_isHidden = false;
-
-	for (size_t i = 0; i < m_children.size(); i++) {
-		m_children[i]->setHidden(false);
-	}
 }
 
 void DynamicWindow::draw()
@@ -83,6 +79,21 @@ void DynamicWindow::shiftChildren(int xShift, int yShift)
 
 		cur->setGeometry(relX, relY);
 	}
+}
+
+void DynamicWindow::setSizes(const std::pair<size_t, size_t>& sizes)
+{
+	m_bounds.w = std::max(static_cast<int>(sizes.first),  MIN_WIN_WIDTH);
+	m_bounds.h = std::max(static_cast<int>(sizes.second), MIN_WIN_HEIGHT);
+	int oldMenuHeight = m_topMenu->getBounds().h;
+	int menuHeight = std::max(MIN_WIN_HEIGHT, m_bounds.h / 40);
+	m_topMenu->setGeometry(0, 0, m_bounds.w, menuHeight);
+
+	int buttonWidth = menuHeight;
+	int buttonX = m_bounds.w - buttonWidth;
+	m_closeButton->setGeometry(buttonX, 0, buttonWidth, menuHeight);
+
+	m_bounds.y += (menuHeight - oldMenuHeight);
 }
 
 bool DynamicWindow::onMouseMove(const Vec2& point, const Vec2& motion)

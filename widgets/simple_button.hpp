@@ -14,6 +14,9 @@ public:
 		         const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~SimpleButton();
 
+	SimpleButton& operator=(SimpleButton& other) = delete;
+	SimpleButton(SimpleButton& other)            = delete;
+
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;
 

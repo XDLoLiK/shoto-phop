@@ -3,7 +3,23 @@
 
 void selectTool(booba::Tool* tool)
 {
+	booba::Tool* curTool = ToolManager::getToolManager()->getCurTool();
+	const std::vector<Widget*>* wids = PluginManager::getPluginManager()->getToolWidgets(curTool);
+
+	if (wids != nullptr) {
+		for (size_t i = 0; i < wids->size(); i++) {
+			wids->at(i)->setHidden(true);
+		}
+	}
+
 	ToolManager::getToolManager()->chooseTool(tool);
+	wids = PluginManager::getPluginManager()->getToolWidgets(tool);
+
+	if (wids != nullptr) {
+		for (size_t i = 0; i < wids->size(); i++) {
+			wids->at(i)->setHidden(false);
+		}
+	}
 }
 
 Toolbar::Toolbar(const Rect& bounds, Widget* parent):

@@ -17,6 +17,11 @@ void ToolManager::chooseTool(booba::Tool* tool)
 	m_currentTool = tool;
 }
 
+booba::Tool* ToolManager::getCurTool()
+{
+	return m_currentTool;
+}
+
 ToolManager::~ToolManager()
 {
 	for (size_t i = 0; i < m_tools.size(); i++)

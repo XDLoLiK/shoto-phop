@@ -18,6 +18,7 @@ public:
 	ToolManager(ToolManager&)            = delete;
 
 	void chooseTool(booba::Tool* tool);
+	booba::Tool* getCurTool();
 
 	void operator+=(booba::Tool* tool);
 	void operator-=(booba::Tool* tool);

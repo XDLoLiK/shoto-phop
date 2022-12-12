@@ -20,7 +20,7 @@ public:
 	Surface(SDL_Surface* realSurface);
 	Surface(int width = 0, int height = 0);
 	Surface(const std::string& image);
-	~Surface();
+	virtual ~Surface();
 
 	Surface& operator=(const Surface& other) = delete;
 	Surface(const Surface& other)            = delete;
@@ -37,14 +37,11 @@ public:
 
 public: /* compatability */
 
-    virtual uint32_t getH() override;
-	virtual uint32_t getW() override;
+    virtual size_t getH() override;
+	virtual size_t getW() override;
 
-    virtual uint32_t getPixel(int32_t x, int32_t y)               override;
-    virtual void putPixel(uint32_t x, uint32_t y, uint32_t color) override;
-
-	virtual       uint32_t& operator()(uint32_t x, uint32_t y)       override;
-	virtual const uint32_t& operator()(uint32_t x, uint32_t y) const override;
+    virtual uint32_t getPixel(size_t x, size_t y)             override;
+    virtual void setPixel(size_t x, size_t y, uint32_t color) override;
 
 private:
 	int m_width  = 0;

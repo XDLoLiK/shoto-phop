@@ -22,14 +22,6 @@ public:
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;
 
-	virtual void addChild   (Widget* child)    override;
-	virtual void removeChild(Widget* child)    override;
-
-	virtual size_t getChildCount()             override;
-	virtual Widget* getChild(size_t pos)       override;
-	virtual Widget* getParent()                override;
-	virtual void setParent(Widget* parent)     override;
-
 public:
 	virtual bool onMouseMove(const Vec2& point, const Vec2& motion)     override;
 	virtual bool onButtonClick  (MouseButton button, const Vec2& point) override;

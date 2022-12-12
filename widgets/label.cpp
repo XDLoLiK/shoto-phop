@@ -75,36 +75,6 @@ bool Label::intersects(const Vec2& point)
 	return true;
 }
 
-void Label::addChild(Widget*)
-{
-
-}
-
-void Label::removeChild(Widget*)
-{
-
-}
-
-size_t Label::getChildCount()
-{
-	return 0;
-}
-
-Widget* Label::getChild(size_t)
-{
-	return nullptr;
-}
-
-Widget* Label::getParent()
-{
-	return m_parent;
-}
-
-void Label::setParent(Widget* parent)
-{
-	m_parent = parent;
-}
-
 bool Label::onMouseMove(const Vec2&, const Vec2&)
 {
 	return false;
@@ -132,5 +102,10 @@ bool Label::onKeyRelease(Key)
 
 bool Label::onTick(Time) 
 {
+	if (m_isHidden) {
+		return false;
+	}
+
+	this->draw();
 	return false;
 }

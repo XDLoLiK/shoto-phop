@@ -1,62 +1,53 @@
-#include "eraser.hpp"
+#include "revealer.hpp"
 
-Eraser::Eraser(const std::string& icon, int x, int y):
-	Instrument(icon, x, y),
+
+extern booba::ApplicationContext* booba::APPCONTEXT;
+const char texture[] = "revealer.png";
+
+
+RevealerTool::RevealerTool():
 	m_curPoint ({-1, -1}),
 	m_prevPoint({-1, -1})
 {
 
 }
 
-Eraser::~Eraser()
+RevealerTool::~RevealerTool()
 {
 
 }
 
-bool Eraser::mouseLeave(Surface*, booba::Event*)
+void RevealerTool::apply(booba::Image* image, const booba::Event* event)
 {
-	m_mouseIsPressed = false;
-
-	return true;
-}
-
-bool Eraser::apply(Surface* surface, booba::Event* event)
-{
-	if (booba::APPCONTEXT) {
-		m_eraseColor = Color(booba::APPCONTEXT->bgColor);
-	}
-	bool res = false;
-
 	switch (event->type) {
 		case booba::EventType::MousePressed:
 			if (event->Oleg.mbedata.button == booba::MouseButton::Left) {
 				m_mouseIsPressed = true;
-				m_curPoint = {event->Oleg.mbedata.x, event->Oleg.mbedata.y};
-				this->drawPoint(surface, m_curPoint);
+				m_curPoint = {static_cast<int>(event->Oleg.mbedata.x), 
+					          static_cast<int>(event->Oleg.mbedata.y)};
+				this->drawPoint(image, m_curPoint);
 			}
 
-			res = true;
 			break;
 
 		case booba::EventType::MouseReleased:
 			if (m_mouseIsPressed) {
 				m_mouseIsPressed = false;
 				m_prevPoint = m_curPoint;
-				m_curPoint  = {event->Oleg.mbedata.x, event->Oleg.mbedata.y};
-				this->drawLine(surface);
+				m_curPoint  = {static_cast<int>(event->Oleg.mbedata.x), 
+					          static_cast<int>(event->Oleg.mbedata.y)};
+				this->drawLine(image);
 			}
 
-			res = true;
 			break;
 
 		case booba::EventType::MouseMoved:
-			m_prevPoint = m_curPoint;
-			m_curPoint  = {event->Oleg.motion.x, event->Oleg.motion.y};	
 			if (m_mouseIsPressed) {
-				this->drawLine(surface);
+				m_prevPoint = m_curPoint;
+				m_curPoint  = {event->Oleg.motion.x, event->Oleg.motion.y};	
+				this->drawLine(image);
 			}
 
-			res = true;
 			break;
 
 		case booba::EventType::NoEvent:
@@ -69,30 +60,39 @@ bool Eraser::apply(Surface* surface, booba::Event* event)
 		default:
 			break;
 	}
-
-	return res;
 }
 
-void Eraser::drawPoint(Surface* surface, const std::pair<int, int>& point)
+const char* RevealerTool::getTexture()
 {
-	int width  = 0;
-	int height = 0;
-	Color* pixmap = surface->getPixmap(&width, &height);
-	
-	int x1 = std::max(0,     point.first - m_brushSize);
+	return texture;
+}
+
+void RevealerTool::buildSetupWidget()
+{
+
+}
+
+void RevealerTool::drawPoint(booba::Image* image, const std::pair<int, int>& point)
+{
+	int width  = static_cast<int>(image->getW());
+	int height = static_cast<int>(image->getH());
+
+	int x1 = std::max(point.first - m_brushSize, 0);
 	int x2 = std::min(width, point.first + m_brushSize);
 
-	int y1 = std::max(0,      point.second - m_brushSize);
+	int y1 = std::max(point.second - m_brushSize, 0);
 	int y2 = std::min(height, point.second + m_brushSize);
 
 	for (int y = y1; y < y2; y++) {
 		for (int x = x1; x < x2; x++) {
-			pixmap[width * y + x] = m_eraseColor;
+			if (std::pow(point.first - x, 2) + std::pow(point.second - y, 2) <= std::pow(m_brushSize, 2)) {
+				image->setPixel(x, y, m_drawColor);
+			}
 		}
 	}
 }
 
-void Eraser::drawLine(Surface* surface)
+void RevealerTool::drawLine(booba::Image* image)
 {
 	// Bresenham's line algorithm
 	int y2 = m_curPoint.second;
@@ -123,8 +123,8 @@ void Eraser::drawLine(Surface* surface)
     const int maxX = x2;
 
     for( ; x < maxX; x++) {
-		if(steep) drawPoint(surface, {y, x});
-        else      drawPoint(surface, {x, y});
+		if(steep) drawPoint(image, {y, x});
+        else      drawPoint(image, {x, y});
 
         error -= static_cast<float>(dy);
         if(error < 0) {
@@ -132,4 +132,10 @@ void Eraser::drawLine(Surface* surface)
             error += static_cast<float>(dx);
         }
     }
+}
+
+void booba::init_module()
+{
+    RevealerTool* revealerTool = new RevealerTool();
+    booba::addTool(revealerTool);
 }

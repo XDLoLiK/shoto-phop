@@ -8,15 +8,23 @@
 #include "modifiers/framable.hpp"
 #include "modifiers/skinnable.hpp"
 
+#define MIN_WIN_WIDTH  100
+#define MIN_WIN_HEIGHT 20
+
 class DynamicWindow : public ContainerWidget, public Skinnable, public Framable
 {
 public:
-	DynamicWindow(const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
+	DynamicWindow(const Rect& bounds = {0, 0, MIN_WIN_WIDTH, MIN_WIN_HEIGHT}, Widget* parent = nullptr);
 	~DynamicWindow();
 
+	DynamicWindow& operator=(DynamicWindow& other) = delete;
+	DynamicWindow(DynamicWindow& other)            = delete;
+
 	void shiftChildren(int xShift, int yShift);
+	void setSizes(const std::pair<size_t, size_t>& sizes);
 
 	virtual void show() override;
+	// virtual void setGeometry(const Rect& bounds) override;
 
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;

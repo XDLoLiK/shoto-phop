@@ -15,10 +15,10 @@ Color::Color(uint32_t color)
 	const uint32_t bmask = 0x0000FF00;
 	const uint32_t amask = 0x000000FF;
 
-	this->r = (color & rmask) >> 24;
-	this->g = (color & gmask) >> 16;
-	this->b = (color & bmask) >> 8;
-	this->a = (color & amask);
+	this->r = static_cast<color_t>((color & rmask) >> 24);
+	this->g = static_cast<color_t>((color & gmask) >> 16);
+	this->b = static_cast<color_t>((color & bmask) >> 8);
+	this->a = static_cast<color_t>((color & amask));
 }
 
 Color::~Color()

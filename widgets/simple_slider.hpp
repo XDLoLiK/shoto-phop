@@ -10,6 +10,9 @@ public:
 		         const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~SimpleSlider();
 
+	SimpleSlider& operator=(SimpleSlider& other) = delete;
+	SimpleSlider(SimpleSlider& other)            = delete;
+
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;
 

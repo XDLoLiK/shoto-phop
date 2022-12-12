@@ -8,8 +8,12 @@ int main()
 	mainFrame.setBackground("./skins/bg.png");
 	mainFrame.show();
 
-	Canvas canvas({620, 140, 1220, 820});
+	Canvas canvas({400, 140, 1220, 820});
 	canvas.show();
+
+	Toolbar* toolbar = new Toolbar({0, 52, 60, 1080 - 52});
+	toolbar->addTools(PluginManager::getPluginManager()->getTools());
+	toolbar->show();
 
 	Frame menuFrame({0, 0, 1920, 52});
 	menuFrame.setBackground(Color(251, 224, 243, 140));
@@ -46,7 +50,7 @@ int main()
 
 	ContextButton<ColorPicker> colorChooseButton("Choose", {410, 140, 180, 60}, colorChoiseWin);
 	colorChooseButton.setContext(&colorPicker);
-	colorChooseButton.setAction(pickColor);
+	colorChooseButton.setAction(pickForgroundColor);
 	colorChooseButton.setBackgroundDefault(Color(251, 224, 243, 140));
 	colorChooseButton.setBackgroundHover(Color(251, 224, 243, 140));
 
@@ -55,9 +59,10 @@ int main()
 	colorButton.setAction(showWin);
 	colorButton.show();
 
-	Toolbar* test = new Toolbar({0, 52, 60, 1080 - 52});
-	test->addTools(PluginManager::getPluginManager()->getTools());
-	test->show();
+	ContextButton<DynamicWindow>* toolButton = new ContextButton<DynamicWindow>("Tool", {300, 0, 100, 52});
+	toolButton->setContext(PluginManager::getPluginManager()->getCanvas());
+	toolButton->setAction(showCanvas);
+	toolButton->show();
 
 	return app.run();
 }

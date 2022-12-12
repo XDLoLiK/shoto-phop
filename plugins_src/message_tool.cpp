@@ -70,8 +70,8 @@ void MessageTool::apply(booba::Image* image, const booba::Event* event)
         mpressed = true;
 
         if (startX < 0 || startY < 0) {
-            startX = event->Oleg.mbedata.x;
-            startY = event->Oleg.mbedata.y;
+            startX = static_cast<int>(event->Oleg.mbedata.x);
+            startY = static_cast<int>(event->Oleg.mbedata.y);
 
             curX = startX;
             curY = startY;
@@ -103,7 +103,7 @@ void MessageTool::putDot(booba::Image* image, int x, int y, int dotSize)
 { 
     for (int curX = std::max(0, x - dotSize); curX < std::min(static_cast<int>(image->getW()), x + dotSize); curX++) {
         for (int curY = std::max(0, y - dotSize); curY < std::min(static_cast<int>(image->getH()), y + dotSize); curY++) {
-            image->putPixel(curX, curY, booba::APPCONTEXT->fgColor);
+            image->setPixel(curX, curY, booba::APPCONTEXT->fgColor);
         }
     }
 }

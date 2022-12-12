@@ -3,15 +3,16 @@
 
 #include <filesystem>
 #include <vector>
+#include <unordered_map>
 #include <dlfcn.h>
 
 #include "plugin.hpp"
 #include "simple_canvas.hpp"
 #include "simple_slider.hpp"
 #include "simple_button.hpp"
-#include "label.hpp"
 
-class Canvas;
+#include "label.hpp"
+#include "dynamic_window.hpp"
 
 class PluginManager
 {
@@ -22,22 +23,29 @@ public:
 	static PluginManager* getPluginManager();
 	~PluginManager();
 
-	void loadPlugins();
-	void addTool(booba::Tool* tool);
+	PluginManager& operator=(PluginManager& other) = delete;
+	PluginManager(PluginManager& other)            = delete;
 
-	std::vector<booba::Tool*>& getTools();
+	void loadPlugins();
+
+	void addTool  (booba::Tool* tool);
+	void addWidget(Widget* widget);
+	void addSizes (const std::pair<size_t, size_t>& sizes);
+
+	const std::vector<booba::Tool*>& getTools();
+	const std::vector<Widget*>* getToolWidgets  (booba::Tool* tool);
+	const std::pair<size_t, size_t>* getToolSize(booba::Tool* tool);
+
+	booba::Tool*   getCurTool();
+	DynamicWindow* getCanvas ();
 
 private:
-	std::vector<booba::Tool*> m_importedTools = std::vector<booba::Tool*>(0);
-};
+	booba::Tool*   m_curTool      = nullptr;
+	DynamicWindow* m_pluginCanvas = nullptr;
 
-uint64_t booba::createButton(int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text);
-uint64_t booba::createLabel    (int32_t x, int32_t y, uint32_t w, uint32_t h, const char* text);
-uint64_t booba::createScrollbar(int32_t x, int32_t y, uint32_t w, uint32_t h, int32_t maxValue, int32_t startValue);
-uint64_t booba::createCanvas(int32_t x, int32_t y, int32_t w, int32_t h);
-void booba::putPixel(uint64_t canvas, int32_t x, int32_t y, uint32_t color);
-void booba::putSprite(uint64_t canvas, int32_t x, int32_t y, uint32_t w, uint32_t h, const char* texture);
-void booba::addTool(booba::Tool* tool);
-void booba::addFilter(booba::Tool* tool);
+	std::vector<booba::Tool*> m_importedTools = {};
+	std::unordered_map<booba::Tool*, std::vector<Widget*>> m_setupWidgets = {};
+	std::unordered_map<booba::Tool*, std::pair<size_t, size_t>> m_sizes   = {};
+};
 
 #endif // PLUGIN_MANAGER_HPP

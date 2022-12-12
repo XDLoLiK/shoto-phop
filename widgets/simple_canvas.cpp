@@ -13,9 +13,9 @@ SimpleCanvas::~SimpleCanvas()
 
 }
 
-void SimpleCanvas::putPixel(uint32_t x, uint32_t y, uint32_t color)
+void SimpleCanvas::setPixel(uint32_t x, uint32_t y, uint32_t color)
 {
-	m_drawingSurface.putPixel(x, y, color);
+	m_drawingSurface.setPixel(x, y, color);
 }
 
 void SimpleCanvas::blit(Surface* surface, const Rect& bounds)
@@ -25,7 +25,7 @@ void SimpleCanvas::blit(Surface* surface, const Rect& bounds)
 
 	for (int y = 0; y < std::min(h, bounds.h); y++) {
 		for (int x = 0; x < std::min(w, bounds.w); x++) {
-			m_drawingSurface.putPixel(bounds.x + x, bounds.y + y, surface->getPixel(x, y));
+			m_drawingSurface.setPixel(bounds.x + x, bounds.y + y, surface->getPixel(x, y));
 		}
 	}
 }
@@ -64,6 +64,10 @@ bool SimpleCanvas::onMouseMove(const Vec2& point, const Vec2& motion)
 		return false;
 	}
 
+	if (!m_connectedTool) {
+		return false;
+	}
+
 	booba::Event genEvent = {};
 	genEvent.type = booba::EventType::CanvasMMoved;
 
@@ -80,6 +84,10 @@ bool SimpleCanvas::onButtonClick(MouseButton button, const Vec2& point)
 		return false;
 	}
 
+	if (!m_connectedTool) {
+		return false;
+	}
+
 	booba::Event genEvent = {};
 	genEvent.type = booba::EventType::CanvasMPressed;
 	
@@ -93,6 +101,10 @@ bool SimpleCanvas::onButtonClick(MouseButton button, const Vec2& point)
 bool SimpleCanvas::onButtonRelease(MouseButton button, const Vec2& point)
 {
 	if (m_isHidden) {
+		return false;
+	}
+
+	if (!m_connectedTool) {
 		return false;
 	}
 

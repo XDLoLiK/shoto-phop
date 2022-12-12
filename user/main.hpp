@@ -14,6 +14,11 @@
 #include "color_chooser.hpp"
 #include "toolbar.hpp"
 
+/* Plugin widgets */
+#include "simple_slider.hpp"
+#include "simple_canvas.hpp"
+#include "simple_button.hpp"
+
 /* Tools */
 #include "brush.hpp"
 #include "bucket.hpp"
@@ -25,7 +30,9 @@
 
 /* Context functions */
 void showWin(DynamicWindow* win);
-void pickColor(ColorPicker* picker);
+void showCanvas(DynamicWindow* win);
+void pickForgroundColor(ColorPicker* picker);
+void pickBackroundColor(ColorPicker* picker);
 void closeApp(App* app);
 
 #endif // MAIN_HPP

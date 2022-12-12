@@ -9,7 +9,10 @@ public:
 	SimpleCanvas(booba::Tool* connectedTool = nullptr, const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~SimpleCanvas();
 
-	void putPixel(uint32_t x, uint32_t y, uint32_t color);
+	SimpleCanvas& operator=(SimpleCanvas& other) = delete;
+	SimpleCanvas(SimpleCanvas& other)            = delete;
+
+	void setPixel(uint32_t x, uint32_t y, uint32_t color);
 	void blit(Surface* surface, const Rect& bounds);
 
 	virtual void draw()                        override;

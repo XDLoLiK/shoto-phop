@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <filesystem>
 
-#include "tools.hpp"
+#include "plugin.hpp"
 
 class MessageTool : public booba::Tool
 {

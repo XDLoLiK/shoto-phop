@@ -66,7 +66,7 @@ bool Brush::apply(Surface* surface, booba::Event* event)
 
 		case booba::EventType::NoEvent:
 		case booba::EventType::ButtonClicked:
-		case booba::EventType::ScrollbarMoved:
+		case booba::EventType::SliderMoved:
 		case booba::EventType::CanvasMPressed:
 		case booba::EventType::CanvasMReleased:
 		case booba::EventType::CanvasMMoved:
