@@ -38,6 +38,12 @@ DropList::~DropList()
 	m_label = nullptr;
 }
 
+void DropList::setShortcut(Key key)
+{
+	m_hasShortcut = true;
+	m_shotrcut = key;
+}
+
 void DropList::setGeometry(const Rect& bounds)
 {
 	m_bounds = bounds;
@@ -131,9 +137,11 @@ bool DropList::onMouseMove(const Vec2& point, const Vec2& motion)
 	if (m_isHidden)
 		return false;
 
-	m_childrenManager.callOnMouseMove(point, motion);
-
 	if (!this->intersects(point) && !this->intersectsChildren(point)) {
+		if (m_shotrcutActive) {
+			return false;
+		}
+
 		for (size_t i = 0; i < this->getChildCount(); i++)
 			this->getChild(i)->setHidden(true);
 
@@ -147,7 +155,11 @@ bool DropList::onMouseMove(const Vec2& point, const Vec2& motion)
 
 	this->setFrameColor(Color(185, 130, 183, 255));
 	this->setBackground(Color(185, 130, 183, 255));
-	return true;
+
+	m_shotrcutActive = false;
+
+	bool res = m_childrenManager.callOnMouseMove(point, motion);
+	return res | true;
 }
 
 bool DropList::intersectsChildren(const Vec2& point)
@@ -182,6 +194,21 @@ bool DropList::onKeyPress(Key key)
 	if (m_isHidden)
 		return false;
 
+	if (key == SDLK_LCTRL) {
+		m_ctrlPresed = true;
+	}
+
+	if (m_ctrlPresed && m_hasShortcut && key == m_shotrcut) {
+		for (size_t i = 0; i < this->getChildCount(); i++)
+			this->getChild(i)->setHidden(false);
+
+		this->setFrameColor(Color(185, 130, 183, 255));
+		this->setBackground(Color(185, 130, 183, 255));
+
+		m_shotrcutActive = true;
+		return true;
+	}
+
 	return m_childrenManager.callOnKeyPress(key);
 }
 
@@ -189,6 +216,10 @@ bool DropList::onKeyRelease(Key key)
 {
 	if (m_isHidden)
 		return false;
+
+	if (key == SDLK_LCTRL) {
+		m_ctrlPresed = false;
+	}
 
 	return m_childrenManager.callOnKeyRelease(key);
 }

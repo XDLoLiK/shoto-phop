@@ -1,12 +1,17 @@
 #include "color_chooser.hpp"
 #include "app.hpp"
 
+static inline bool operator==(const Rect& first, const Rect& second)
+{
+	return (first.x == second.x && first.y == second.y &&
+		    first.w == second.w && first.h == second.h);
+}
+
 ColorPicker::ColorPicker(const Rect& bounds, Widget* parent):
 	Widget(bounds, parent)
 {
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.08;
-	const double colorOffsetScale   = 0.92;
+	const double colorWidWidthScale = 0.10;
 
 	m_colorPickerTone  = Surface(m_bounds.w * toneWidWidthScale,  m_bounds.h);
 	m_colorPickerColor = Surface(m_bounds.w * colorWidWidthScale, m_bounds.h);
@@ -47,6 +52,9 @@ void ColorPicker::fillWithColors()
 			pixmap[y * width + x] = curColor;
 		}
 	}
+
+	delete m_colorPickerColorTex;
+	m_colorPickerColorTex = new Texture(m_colorPickerColor);
 }
 
 void ColorPicker::fillWithTones()
@@ -74,6 +82,9 @@ void ColorPicker::fillWithTones()
 			pixmap[y * width + x] = curColor;
 		}
 	}
+
+	delete m_colorPickerToneTex;
+	m_colorPickerToneTex = new Texture(m_colorPickerTone);
 }
 
 Color fromHSVtoRGBA(int h, int s, int v)
@@ -137,8 +148,8 @@ Color fromHSVtoRGBA(int h, int s, int v)
 void ColorPicker::draw()
 {
 	Renderer* renderer = getApp()->getRenderer();
-
 	static int prevH = 0;
+
 	if (prevH != m_h) {
 		prevH = m_h;
 		this->fillWithTones();
@@ -146,22 +157,18 @@ void ColorPicker::draw()
 	}
 
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.08;
-	const double colorOffsetScale   = 0.92;
+	const double colorWidWidthScale = 0.10;
+	const double colorOffsetScale   = 0.90;
 
-	Rect toneBounds  = {m_bounds.x,                                 m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
-	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y, m_bounds.w * colorWidWidthScale, m_bounds.h};
+	Rect toneBounds  = {m_bounds.x, m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
+	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y,
+		                m_bounds.w * colorWidWidthScale, m_bounds.h};
 
 	Rect m_copyToneBounds  = {0, 0, m_colorPickerTone.getWidth(),  m_colorPickerTone.getHeight()};
 	Rect m_copyColorBounds = {0, 0, m_colorPickerColor.getWidth(), m_colorPickerColor.getHeight()};
 
-	Texture* toneTexture = new Texture(m_colorPickerTone);
-	renderer->copyTexture(toneTexture, toneBounds, m_copyToneBounds);
-	delete toneTexture;
-
-	Texture* colorTexture = new Texture(m_colorPickerColor);
-	renderer->copyTexture(colorTexture, colorBounds, m_copyColorBounds);
-	delete colorTexture;
+	renderer->copyTexture(m_colorPickerToneTex,  toneBounds,  m_copyToneBounds);
+	renderer->copyTexture(m_colorPickerColorTex, colorBounds, m_copyColorBounds);
 
 	this->drawFrame(m_bounds);
 }
@@ -212,6 +219,10 @@ bool ColorPicker::onButtonClick(MouseButton button, const Vec2& point)
 	if (m_isHidden) {
 		return false;
 	}
+
+	if (this->intersects(point)) {
+		return true;
+	}
 }
 
 bool ColorPicker::onButtonRelease(MouseButton button, const Vec2& point)
@@ -225,11 +236,12 @@ bool ColorPicker::onButtonRelease(MouseButton button, const Vec2& point)
 	}
 
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.08;
-	const double colorOffsetScale   = 0.92;
+	const double colorWidWidthScale = 0.10;
+	const double colorOffsetScale   = 0.90;
 
-	Rect toneBounds  = {m_bounds.x,                                 m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
-	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y, m_bounds.w * colorWidWidthScale, m_bounds.h};
+	Rect toneBounds  = {m_bounds.x, m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
+	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y,
+		                m_bounds.w * colorWidWidthScale, m_bounds.h};
 
 	if (intersectsBounds(point, toneBounds)) {
 		int width  = 0;
@@ -248,8 +260,6 @@ bool ColorPicker::onButtonRelease(MouseButton button, const Vec2& point)
 
 		double newH = 360.0 * rel;
 		m_h = static_cast<int>(newH);
-
-		std::cout << m_h << std::endl;
 	}
 }
 

@@ -38,15 +38,13 @@ Toolbar::~Toolbar()
 
 void Toolbar::addTool(booba::Tool* tool)
 {
-	int sizes = static_cast<int>(static_cast<float>(m_bounds.w) * 0.8);
-
-	int w = sizes;
-	int h = sizes;
+	int w = ICON_DEFAULT_SIZE;
+	int h = ICON_DEFAULT_SIZE;
 	int x = (m_bounds.w - w) / 2;
 	int y = h * (m_selectors.size() * 2 + 1);
 	Rect newBounds = {x, y, w, h};
 
-	ContextButton<booba::Tool>* newButton = new ContextButton<booba::Tool>("", newBounds, this);
+	ContextButton<booba::Tool>* newButton = new ContextButton<booba::Tool>("", newBounds, black, this);
 
 	newButton->setFrameColor(NO_FRAME);
 	newButton->setBackground(std::string("./plugins/") + std::string(tool->getTexture()));
@@ -92,13 +90,40 @@ bool Toolbar::intersects(const Vec2& point)
 	return true;
 }
 
+void Toolbar::shiftIcons(int val)
+{
+	for (size_t i = 0; i < m_selectors.size(); i++) {
+		m_selectors[i]->setGeometry(m_selectors[i]->getBounds().x + val - m_bounds.x, m_selectors[i]->getBounds().y - m_bounds.y);
+	}
+}
+
 bool Toolbar::onMouseMove(const Vec2& point, const Vec2& motion)
 {
+	static int maxW = m_bounds.w + 20;
+	static int minW = m_bounds.w;
+
 	if (m_isHidden) {
 		return false;
 	}
 
-	return m_childrenManager.callOnMouseMove(point, motion);
+	bool res = m_childrenManager.callOnMouseMove(point, motion);
+
+	if (this->intersects(point)) {
+		if (m_bounds.w < maxW) {
+			m_bounds.w += 2;
+			this->shiftIcons(1);
+			res |= 1;
+		}
+	}
+	else {
+		if (m_bounds.w > minW) {
+			m_bounds.w -= 2;
+			this->shiftIcons(-1);
+			res |= 1;
+		}
+	}
+
+	return res;
 }
 
 bool Toolbar::onButtonClick(MouseButton button, const Vec2& point)

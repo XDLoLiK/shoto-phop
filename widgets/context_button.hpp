@@ -13,10 +13,11 @@ template <class Context>
 class ContextButton : public Widget, public Framable, public Skinnable
 {
 public:
-	ContextButton(const std::string& text = "", int size = 0, Widget* parent = nullptr):
-		Widget(parent)
+	ContextButton(const std::string& text = "", int size = 0, const Color& color = black, Widget* parent = nullptr):
+		Widget(parent),
+		m_textColor(color)
 	{
-		m_label = new Label(text, size, black);
+		m_label = new Label(text, size, m_textColor);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
@@ -27,10 +28,11 @@ public:
 		this->setFrameColorHover(Color(185, 130, 183, 255));
 	}
 
-	ContextButton(const std::string& text, const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr):
-		Widget(bounds, parent)
+	ContextButton(const std::string& text, const Rect& bounds = {0, 0, 0, 0}, const Color& color = black, Widget* parent = nullptr):
+		Widget(bounds, parent),
+		m_textColor(color)
 	{
-		m_label = new Label(text, m_bounds.h, black);
+		m_label = new Label(text, m_bounds.h, m_textColor);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
@@ -62,6 +64,12 @@ public:
 		m_action = action;
 	}
 
+	void setShortcut(Key key)
+	{
+		m_hasShortcut = true;
+		m_shotrcut = key;
+	}
+
 public:
 	virtual void setGeometry(const Rect& bounds) override
 	{
@@ -77,7 +85,7 @@ public:
 		const std::string& oldText = m_label->getText();
 		delete m_label;
 
-		m_label = new Label(oldText, m_bounds.h, black);
+		m_label = new Label(oldText, m_bounds.h, m_textColor);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
@@ -136,10 +144,14 @@ public:
 		return true;
 	}
 
-	virtual bool onButtonClick(MouseButton, const Vec2&) override
+	virtual bool onButtonClick(MouseButton, const Vec2& point) override
 	{
 		if (m_isHidden)
 			return false;
+
+		if (this->intersects(point)) {
+			return true;
+		}
 
 		return false;
 	}
@@ -155,18 +167,31 @@ public:
 		return true;
 	}
 
-	virtual bool onKeyPress(Key) override
+	virtual bool onKeyPress(Key key) override
 	{
 		if (m_isHidden)
 			return false;
+
+		if (key == SDLK_LCTRL) {
+			m_ctrlPresed = true;
+		}
+
+		if (m_ctrlPresed && m_hasShortcut && key == m_shotrcut) {
+			(m_action)(m_context);
+			return true;
+		}
 
 		return false;
 	}
 
-	virtual bool onKeyRelease(Key) override
+	virtual bool onKeyRelease(Key key) override
 	{
 		if (m_isHidden)
 			return false;
+
+		if (key == SDLK_LCTRL) {
+			m_ctrlPresed = false;
+		}
 
 		return false;
 	}
@@ -184,7 +209,12 @@ private:
 	Context* m_context = nullptr;
 	void (*m_action)(Context*) = nullptr;
 
+	bool m_ctrlPresed  = false;
+	bool m_hasShortcut = false;
+	Key m_shotrcut = SDLK_ESCAPE;
+
 	Label* m_label = nullptr;
+	Color m_textColor = black;
 };
 
 #endif // CONTEXT_BUTTON_HPP

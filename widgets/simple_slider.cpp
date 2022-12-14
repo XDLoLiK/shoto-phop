@@ -13,7 +13,8 @@ SimpleSlider::SimpleSlider(booba::Tool* connectedTool, int max, int start,
 	double rel = static_cast<double>(start) / static_cast<double>(max);
 	int startX = static_cast<int>(rel * (m_bounds.w - sliderWidth));
 
-	Rect sliderBounds = {startX, 0, sliderWidth, m_bounds.h};
+	const Rect& canvasBounds = PluginManager::getPluginManager()->getCanvas()->getBounds();
+	Rect sliderBounds = {startX - canvasBounds.x, 0 - canvasBounds.y, sliderWidth, m_bounds.h};
 
 	m_slider = new Frame(sliderBounds, this);
 	m_slider->setHidden(false);
@@ -51,6 +52,22 @@ bool SimpleSlider::intersects(const Vec2& point)
 	}
 
 	return true;
+}
+
+void SimpleSlider::setGeometry(const Rect& bounds)
+{
+	int relX = m_bounds.x - m_slider->getBounds().x;
+	int relY = m_bounds.x - m_slider->getBounds().y;
+
+	m_bounds = bounds;
+	m_slider->setGeometry(relX, relY);
+
+	Widget* curWid = m_parent;
+	while (curWid) {
+		m_bounds.x += curWid->getBounds().x;
+		m_bounds.y += curWid->getBounds().y;
+		curWid = curWid->getParent();
+	}
 }
 
 bool SimpleSlider::onMouseMove(const Vec2& point, const Vec2& motion)

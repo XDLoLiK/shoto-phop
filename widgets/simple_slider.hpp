@@ -13,8 +13,9 @@ public:
 	SimpleSlider& operator=(SimpleSlider& other) = delete;
 	SimpleSlider(SimpleSlider& other)            = delete;
 
-	virtual void draw()                        override;
-	virtual bool intersects(const Vec2& point) override;
+	virtual void draw()                          override;
+	virtual bool intersects(const Vec2& point)   override;
+	virtual void setGeometry(const Rect& bounds) override;
 
 	virtual bool onMouseMove(const Vec2& point, const Vec2& motion)     override;
 	virtual bool onButtonClick  (MouseButton button, const Vec2& point) override;

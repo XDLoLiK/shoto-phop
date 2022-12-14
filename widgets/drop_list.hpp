@@ -15,6 +15,8 @@ public:
 	DropList(const std::string& text = "", int size = 0, Widget* parent = nullptr);
 	DropList(const std::string& text, const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~DropList();
+	
+	void setShortcut(Key key);
 
 	DropList& operator=(DropList&) = delete;
 	DropList(DropList&)            = delete;
@@ -41,6 +43,12 @@ public:
 	virtual bool onTick(Time time)     override;
 
 protected:
+	Key m_shotrcut = SDLK_ESCAPE;
+
+	bool m_shotrcutActive = false;
+	bool m_ctrlPresed     = false;
+	bool m_hasShortcut    = false;
+
 	Label* m_label = nullptr;
 };
 

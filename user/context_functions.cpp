@@ -26,7 +26,7 @@ void pickForgroundColor(ColorPicker* picker)
 	booba::APPCONTEXT->fgColor = picker->getColor().mapRGBA();
 }
 
-void pickBackroundColor(ColorPicker* picker)
+void pickBackgroundColor(ColorPicker* picker)
 {
 	booba::APPCONTEXT->bgColor = picker->getColor().mapRGBA();
 }

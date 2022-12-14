@@ -44,7 +44,8 @@ public:
 	virtual bool isInFocuse() const;
 	virtual void setInFocuse(bool val);
 
-	virtual const Rect& getBounds() const;
+	virtual const Rect& getBounds()     const;
+	virtual const Rect& getRealBounds() const;
 
 	virtual void setGeometry(const Rect& bounds);
 	virtual void setGeometry(int x, int y, int w = -1, int h = -1);

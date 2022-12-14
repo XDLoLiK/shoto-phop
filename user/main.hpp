@@ -32,7 +32,7 @@
 void showWin(DynamicWindow* win);
 void showCanvas(DynamicWindow* win);
 void pickForgroundColor(ColorPicker* picker);
-void pickBackroundColor(ColorPicker* picker);
+void pickBackgroundColor(ColorPicker* picker);
 void closeApp(App* app);
 
 #endif // MAIN_HPP

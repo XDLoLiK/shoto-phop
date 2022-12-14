@@ -9,6 +9,9 @@
 #include "modifiers/skinnable.hpp"
 #include "modifiers/framable.hpp"
 
+#define ICON_DEFAULT_SIZE 40
+#define MAX_RESIZE_VAL    20
+
 class Toolbar : public ContainerWidget, public Skinnable, public Framable
 {
 public:
@@ -17,6 +20,8 @@ public:
 
 	void addTool(booba::Tool* tool);
 	void addTools(const std::vector<booba::Tool*>& tools);
+
+	void shiftIcons(int val);
 
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;

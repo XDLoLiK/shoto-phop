@@ -19,6 +19,8 @@ public:
 	Button& operator=(Button& other) = default;
 	Button(Button& other)            = default;
 
+	void setShortcut(Key key);
+
 	void setFrameHoverColor(const Color& color);
 	void setFrameDefaultColor(const Color& color);
 
@@ -43,6 +45,10 @@ public:
 
 private:
 	Label* m_label = nullptr;
+
+	Key m_shotrcut = SDLK_ESCAPE;
+	bool m_ctrlPresed  = false;
+	bool m_hasShortcut = false;
 
 	Color m_frameHoverColor   = Color(185, 130, 183, 255);
 	Color m_frameDefaultColor = Color(231, 178, 212, 255);

@@ -120,6 +120,21 @@ const Rect& Widget::getBounds() const
 	return m_bounds;
 }
 
+const Rect& Widget::getRealBounds() const
+{
+	static Rect bounds;
+	bounds = m_bounds;
+
+	Widget* parent = m_parent;
+	while (parent) {
+		bounds.x += parent->getBounds().x;
+		bounds.y += parent->getBounds().y;
+		parent = parent->getParent();
+	}
+
+	return bounds;
+}
+
 void Widget::addChild(Widget*)
 {
 

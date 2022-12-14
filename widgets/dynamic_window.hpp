@@ -14,7 +14,7 @@
 class DynamicWindow : public ContainerWidget, public Skinnable, public Framable
 {
 public:
-	DynamicWindow(const Rect& bounds = {0, 0, MIN_WIN_WIDTH, MIN_WIN_HEIGHT}, Widget* parent = nullptr);
+	DynamicWindow(const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~DynamicWindow();
 
 	DynamicWindow& operator=(DynamicWindow& other) = delete;

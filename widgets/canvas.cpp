@@ -95,6 +95,11 @@ bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 	if (m_isHidden || !this->intersects(point))
 		return false;
 
+	bool res = m_childrenManager.callOnButtonClick(button, point);
+	if (res) {
+		return res;
+	}
+
 	size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
 	size_t sizeofPixel  = sizeof (Color);
 
@@ -106,10 +111,7 @@ bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 		m_prevStates.pop_front();
 
 	Vec2 relPoint = point - Vec2(m_bounds.x, m_bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
-
-	bool res = false;
 	res &= ToolManager::getToolManager()->reactToButtonClick(m_drawingSurface, button, relPoint);
-	res &= m_childrenManager.callOnButtonClick(button, point);
 
 	return res;
 }

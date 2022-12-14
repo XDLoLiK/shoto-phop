@@ -58,7 +58,16 @@ bool Frame::onButtonClick(MouseButton button, const Vec2& point)
 	if (m_isHidden)
 		return false;
 
-	return m_childrenManager.callOnButtonClick(button, point);
+	bool res = m_childrenManager.callOnButtonClick(button, point);
+	if (res) {
+		return res;
+	}
+
+	if (this->intersects(point)) {
+		return true;
+	}
+
+	return false;
 }
 
 bool Frame::onButtonRelease(MouseButton button, const Vec2& point)

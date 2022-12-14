@@ -32,6 +32,9 @@ private:
 	Surface m_colorPickerTone  = Surface();
 	Surface m_colorPickerColor = Surface();
 
+	Texture* m_colorPickerToneTex  = nullptr;
+	Texture* m_colorPickerColorTex = nullptr;
+
 	int m_h = 0;
 	int m_s = 0;
 	int m_v = 0;

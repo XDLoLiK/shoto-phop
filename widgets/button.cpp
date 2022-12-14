@@ -37,6 +37,12 @@ Button::Button(const std::string& text, const Rect& bounds, Widget* parent):
 	this->setBackground(m_defaultTexture);
 }
 
+void Button::setShortcut(Key key)
+{
+	m_hasShortcut = true;
+	m_shotrcut = key;
+}
+
 Button::~Button()
 {
 	delete m_label;
@@ -146,18 +152,31 @@ bool Button::onButtonRelease(MouseButton button, const Vec2& point)
 	return true;
 }
 
-bool Button::onKeyPress(Key)
+bool Button::onKeyPress(Key key)
 {
 	if (m_isHidden)
 		return false;
+
+	if (key == SDLK_LCTRL) {
+		m_ctrlPresed = true;
+	}
+
+	if (m_ctrlPresed && m_hasShortcut && key == m_shotrcut) {
+		buttonClick();
+		return true;
+	}
 
 	return false;
 }
 
-bool Button::onKeyRelease(Key)
+bool Button::onKeyRelease(Key key)
 {
 	if (m_isHidden)
 		return false;
+
+	if (key == SDLK_LCTRL) {
+		m_ctrlPresed = false;
+	}
 
 	return false;
 }
