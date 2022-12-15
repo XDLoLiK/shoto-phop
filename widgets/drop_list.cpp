@@ -79,8 +79,8 @@ void DropList::draw()
 	if (m_isHidden)
 		return;
 
-	drawSkin (m_bounds);
-	drawFrame(m_bounds);
+	drawSkin (this->getRealBounds());
+	drawFrame(this->getRealBounds());
 
 	m_label->draw();
 }
@@ -102,7 +102,7 @@ bool DropList::intersects(const Vec2& point)
 	return true;
 }
 
-void DropList::addEntry(Button* entry)
+void DropList::addEntry(Widget* entry)
 {
 	this->addChild(entry);
 	entry->setGeometry(0, static_cast<int>(this->getChildCount()) * m_bounds.h);

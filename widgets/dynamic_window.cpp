@@ -7,12 +7,12 @@ DynamicWindow::DynamicWindow(const Rect& bounds, Widget* parent):
 	m_bounds.w = std::max(MIN_WIN_WIDTH,  m_bounds.w);
 	m_bounds.h = std::max(MIN_WIN_HEIGHT, m_bounds.h);
 	int menuHeight = 20;
-	m_topMenu = new Frame(Rect(0, 0, m_bounds.w, menuHeight), this);
+	m_topMenu = new Frame(Rect(0, -menuHeight, m_bounds.w, menuHeight), this);
 	m_topMenu->setHidden(false);
 
 	int buttonWidth = menuHeight;
 	int buttonX = m_bounds.w - buttonWidth;
-	m_closeButton = new Button("", Rect(buttonX, 0, buttonWidth, menuHeight), this);
+	m_closeButton = new Button("", Rect(buttonX, -menuHeight, buttonWidth, menuHeight), this);
 
 	m_closeButton->setDefaultTexture("./skins/red_cross.png");
 	m_closeButton->setHoverTexture("./skins/red_cross.png");
@@ -45,20 +45,22 @@ void DynamicWindow::draw()
 	if (m_isHidden)
 		return;
 
-	drawSkin (m_bounds);
-	drawFrame(m_bounds);
+	drawSkin (this->getRealBounds());
+	drawFrame(this->getRealBounds());
 }
 
 bool DynamicWindow::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
@@ -84,17 +86,14 @@ void DynamicWindow::shiftChildren(int xShift, int yShift)
 void DynamicWindow::setSizes(const std::pair<size_t, size_t>& sizes)
 {
 	int menuHeight = 20;
-	m_bounds.y -= menuHeight;
 
 	m_bounds.w = std::max(static_cast<int>(sizes.first),  MIN_WIN_WIDTH);
 	m_bounds.h = std::max(static_cast<int>(sizes.second), MIN_WIN_HEIGHT);
-	m_topMenu->setGeometry(0, 0, m_bounds.w, menuHeight);
+	m_topMenu->setGeometry(0, -menuHeight, m_bounds.w, menuHeight);
 
 	int buttonWidth = menuHeight;
 	int buttonX = m_bounds.w - buttonWidth;
-	m_closeButton->setGeometry(buttonX, 0, buttonWidth, menuHeight);
-
-	m_bounds.y += menuHeight;
+	m_closeButton->setGeometry(buttonX, -menuHeight, buttonWidth, menuHeight);
 }
 
 bool DynamicWindow::onMouseMove(const Vec2& point, const Vec2& motion)
@@ -110,7 +109,6 @@ bool DynamicWindow::onMouseMove(const Vec2& point, const Vec2& motion)
 		int xShift = static_cast<int>(motion.getX());
 		int yShift = static_cast<int>(motion.getY());
 
-		this->shiftChildren(xShift, yShift);
 		this->setGeometry(m_bounds.x + xShift, m_bounds.y + yShift);
 
 		res = true;

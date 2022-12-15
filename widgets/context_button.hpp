@@ -17,7 +17,7 @@ public:
 		Widget(parent),
 		m_textColor(color)
 	{
-		m_label = new Label(text, size, m_textColor);
+		m_label = new Label(text, size, m_textColor, DEFAULT_FONT, this);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
@@ -32,12 +32,12 @@ public:
 		Widget(bounds, parent),
 		m_textColor(color)
 	{
-		m_label = new Label(text, m_bounds.h, m_textColor);
+		m_label = new Label(text, m_bounds.h, m_textColor, DEFAULT_FONT, this);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 
-		m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
+		m_label->setGeometry((m_bounds.w - m_label->getBounds().w) / 2, 0);
 
 		this->setBackgroundDefault(Color(231, 178, 212, 255));
 		this->setBackgroundHover(Color(185, 130, 183, 255));
@@ -74,23 +74,16 @@ public:
 	virtual void setGeometry(const Rect& bounds) override
 	{
 		m_bounds = bounds;
-		Widget* curWid = m_parent;
-
-		while (curWid) {
-			m_bounds.x += curWid->getBounds().x;
-			m_bounds.y += curWid->getBounds().y;
-			curWid = curWid->getParent();
-		}
 
 		const std::string& oldText = m_label->getText();
 		delete m_label;
 
-		m_label = new Label(oldText, m_bounds.h, m_textColor);
+		m_label = new Label(oldText, m_bounds.h, m_textColor, DEFAULT_FONT, this);
 
 		m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 		m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 		
-		m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
+		m_label->setGeometry((m_bounds.w - m_label->getBounds().w) / 2, 0);
 	}
 
 	virtual void setGeometry(int x, int y, int w = -1, int h = -1) override
@@ -106,22 +99,24 @@ public:
 		if (m_isHidden)
 			return;
 
-		drawSkin (m_bounds, m_isHovered);
-		drawFrame(m_bounds, m_isHovered);
+		drawSkin (this->getRealBounds(), m_isHovered);
+		drawFrame(this->getRealBounds(), m_isHovered);
 
 		m_label->draw();
 	}
 
 	virtual bool intersects(const Vec2& point) override
 	{
-		if (point.getX() < m_bounds.x || 
-			point.getX() > m_bounds.x + m_bounds.w)
+		const Rect& bounds = this->getRealBounds();
+
+		if (point.getX() < bounds.x || 
+			point.getX() > bounds.x + bounds.w)
 		{
 			return false;
 		}
 
-		if (point.getY() < m_bounds.y || 
-			point.getY() > m_bounds.y + m_bounds.h)
+		if (point.getY() < bounds.y || 
+			point.getY() > bounds.y + bounds.h)
 		{
 			return false;
 		}

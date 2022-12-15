@@ -14,8 +14,8 @@ public:
 	~ColorPicker();
 
 	Color getColor();
-	void fillWithColors();
-	void fillWithTones();
+	void fillWithColors(int yc = 0);
+	void fillWithTones(int xc = 0, int yc = 0);
 
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;

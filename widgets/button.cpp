@@ -8,7 +8,7 @@ extern App* __theApp__;
 Button::Button(const std::string& text, int size, Widget* parent):
 	Widget(parent)
 {
-	m_label = new Label(text, size, black);
+	m_label = new Label(text, size, black, DEFAULT_FONT, this);
 
 	m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 	m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
@@ -23,12 +23,12 @@ Button::Button(const std::string& text, int size, Widget* parent):
 Button::Button(const std::string& text, const Rect& bounds, Widget* parent):
 	Widget(bounds, parent)
 {
-	m_label = new Label(text, m_bounds.h, black);
+	m_label = new Label(text, m_bounds.h, black, DEFAULT_FONT, this);
 
 	m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 	m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 
-	m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
+	m_label->setGeometry((m_bounds.w - m_label->getBounds().w) / 2, 0);
 
 	this->setDefaultTexture(Color(231, 178, 212, 255));
 	this->setHoverTexture(Color(185, 130, 183, 255));
@@ -62,23 +62,16 @@ void Button::setFrameDefaultColor(const Color& color)
 void Button::setGeometry(const Rect& bounds)
 {
 	m_bounds = bounds;
-	Widget* curWid = m_parent;
-
-	while (curWid) {
-		m_bounds.x += curWid->getBounds().x;
-		m_bounds.y += curWid->getBounds().y;
-		curWid = curWid->getParent();
-	}
 
 	const std::string& oldText = m_label->getText();
 	delete m_label;
 
-	m_label = new Label(oldText, m_bounds.h, black);
+	m_label = new Label(oldText, m_bounds.h, black, DEFAULT_FONT, this);
 
 	m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 	m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 	
-	m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
+	m_label->setGeometry((m_bounds.w - m_label->getBounds().w) / 2, 0);
 }
 
 void Button::setGeometry(int x, int y, int w, int h)
@@ -94,22 +87,24 @@ void Button::draw()
 	if (m_isHidden)
 		return;
 
-	drawSkin (m_bounds);
-	drawFrame(m_bounds);
+	drawSkin (this->getRealBounds());
+	drawFrame(this->getRealBounds());
 
 	m_label->draw();
 }
 
 bool Button::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}

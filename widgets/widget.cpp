@@ -48,13 +48,6 @@ void Widget::hide()
 void Widget::setGeometry(const Rect& bounds)
 {
 	m_bounds = bounds;
-	Widget* curWid = m_parent;
-
-	while (curWid) {
-		m_bounds.x += curWid->getBounds().x;
-		m_bounds.y += curWid->getBounds().y;
-		curWid = curWid->getParent();
-	}
 }
 
 void Widget::setGeometry(int x, int y, int w, int h)

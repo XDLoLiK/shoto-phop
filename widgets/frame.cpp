@@ -24,20 +24,22 @@ Frame::~Frame()
 
 void Frame::draw()
 {
-	drawFrame(m_bounds);
-	drawSkin (m_bounds);
+	drawFrame(this->getRealBounds());
+	drawSkin (this->getRealBounds());
 }
 
 bool Frame::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}

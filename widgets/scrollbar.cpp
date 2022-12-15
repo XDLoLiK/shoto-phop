@@ -25,20 +25,22 @@ void Scrollbar::draw()
 	if (m_isHidden)
 		return;
 
-	drawFrame(m_bounds);
-	drawSkin (m_bounds);
+	drawFrame(this->getRealBounds());
+	drawSkin (this->getRealBounds());
 }
 
 bool Scrollbar::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x ||
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
@@ -101,7 +103,7 @@ HScrollbar::~HScrollbar()
 float HScrollbar::getValue()
 {
 	float maxValue = static_cast<float>(m_bounds.w - m_slider->getBounds().w);
-	float curValue = static_cast<float>(m_slider->getBounds().x - m_bounds.x);
+	float curValue = static_cast<float>(m_slider->getRealBounds().x - this->getRealBounds().x);
 
 	return curValue / maxValue;
 }
@@ -112,10 +114,11 @@ bool HScrollbar::onMouseMove(const Vec2& point, const Vec2& motion)
 		return false;
 	
 	bool res = m_childrenManager.callOnMouseMove(point, motion);
+	const Rect& bounds = this->getRealBounds();
 
 	if (m_sliderIsHeld) {
-		int x = static_cast<int>(point.getX()) - m_bounds.x - m_offset;
-		x = std::min(std::max(0, x), m_bounds.w - m_slider->getBounds().w);
+		int x = static_cast<int>(point.getX()) - bounds.x - m_offset;
+		x = std::min(std::max(0, x), bounds.w - m_slider->getRealBounds().w);
 		m_slider->setGeometry(x, 0);
 
 		res &= true;
@@ -133,7 +136,7 @@ bool HScrollbar::onButtonClick(MouseButton button, const Vec2& point)
 
 	if (button == SDL_BUTTON_LEFT && m_slider->intersects(point)) {
 		m_sliderIsHeld = true;
-		m_offset = static_cast<int>(point.getX()) - m_slider->getBounds().x;;
+		m_offset = static_cast<int>(point.getX()) - m_slider->getRealBounds().x;;
 
 		res &= true;
 	}
@@ -185,7 +188,7 @@ VScrollbar::~VScrollbar()
 float VScrollbar::getValue()
 {
 	float maxValue = static_cast<float>(m_bounds.h - m_slider->getBounds().h);
-	float curValue = static_cast<float>(m_slider->getBounds().y - m_bounds.y);
+	float curValue = static_cast<float>(m_slider->getRealBounds().y - this->getRealBounds().y);
 
 	return curValue / maxValue;
 }
@@ -196,10 +199,11 @@ bool VScrollbar::onMouseMove(const Vec2& point, const Vec2& motion)
 		return false;
 	
 	bool res = m_childrenManager.callOnMouseMove(point, motion);
+	const Rect& bounds = this->getRealBounds();
 
 	if (m_sliderIsHeld) {
-		int y = static_cast<int>(point.getY()) - m_bounds.y - m_offset;
-		y = std::min(std::max(0, y), m_bounds.h - m_slider->getBounds().h);
+		int y = static_cast<int>(point.getY()) - bounds.y - m_offset;
+		y = std::min(std::max(0, y), bounds.h - m_slider->getRealBounds().h);
 		m_slider->setGeometry(0, y);
 
 		res &= true;
@@ -217,7 +221,7 @@ bool VScrollbar::onButtonClick(MouseButton button, const Vec2& point)
 
 	if (button == SDL_BUTTON_LEFT && m_slider->intersects(point)) {
 		m_sliderIsHeld = true;
-		m_offset = static_cast<int>(point.getY()) - m_slider->getBounds().y;
+		m_offset = static_cast<int>(point.getY()) - m_slider->getRealBounds().y;
 
 		res &= true;
 	}

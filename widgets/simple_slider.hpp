@@ -6,7 +6,7 @@
 class SimpleSlider : public Frame
 {
 public:
-	SimpleSlider(booba::Tool* connectedTool = nullptr, int max = 0, int start = 0, 
+	SimpleSlider(booba::Tool* connectedTool = nullptr, int64_t min = 0, int64_t max = 0, int64_t start = 0, 
 		         const Rect& bounds = {0, 0, 0, 0}, Widget* parent = nullptr);
 	~SimpleSlider();
 
@@ -15,7 +15,6 @@ public:
 
 	virtual void draw()                          override;
 	virtual bool intersects(const Vec2& point)   override;
-	virtual void setGeometry(const Rect& bounds) override;
 
 	virtual bool onMouseMove(const Vec2& point, const Vec2& motion)     override;
 	virtual bool onButtonClick  (MouseButton button, const Vec2& point) override;
@@ -33,8 +32,9 @@ private:
 
 	booba::Tool* m_connectedTool = nullptr;
 
-	int m_maxValue = 0;
-	int m_curValue = 0;
+	int64_t m_minValue = 0;
+	int64_t m_maxValue = 0;
+	int64_t m_curValue = 0;
 };
 
 #endif // SIMPLE_SLIDER_HPP

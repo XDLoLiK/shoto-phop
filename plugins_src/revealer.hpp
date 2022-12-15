@@ -27,6 +27,7 @@ private:
 	int m_brushSize = 16; /* size in pixels */
 
 	bool m_mouseIsPressed = false;
+	uint64_t m_sizeSlider = 0;
 };
 
 #endif // REVEALER_TOOL_HPP

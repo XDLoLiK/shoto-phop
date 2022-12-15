@@ -1,10 +1,6 @@
 #include "label.hpp"
 #include "app.hpp"
 
-
-extern App* __theApp__;
-
-
 Label::Label(const std::string& text, int size, const Color& color, 
 	         const std::string& font, Widget* parent):
 	Widget(parent),
@@ -37,14 +33,6 @@ void Label::setGeometry(const Rect& bounds)
 {
 	m_bounds.x = bounds.x;
 	m_bounds.y = bounds.y;
-
-	Widget* curWid = m_parent;
-
-	while (curWid) {
-		m_bounds.x += curWid->getBounds().x;
-		m_bounds.y += curWid->getBounds().y;
-		curWid = curWid->getParent();
-	}
 }
 
 void Label::setGeometry(int x, int y, int w, int h)
@@ -54,8 +42,8 @@ void Label::setGeometry(int x, int y, int w, int h)
 
 void Label::draw()
 {
-	Renderer* renderer = __theApp__->getRenderer();
-	renderer->copyTexture(m_textTexture, m_bounds, m_textTexture->getBounds());
+	Renderer* renderer = getApp()->getRenderer();
+	renderer->copyTexture(m_textTexture, this->getRealBounds(), m_textTexture->getBounds());
 }
 
 bool Label::intersects(const Vec2& point)

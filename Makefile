@@ -1,4 +1,5 @@
-SRC_DIRS := . app common sdl/textures sdl/event_manager sdl/renderer sdl/window sdl/cursor widgets signals modifiers instruments standart user
+SRC_DIRS := . app common lodepng dialogs sdl/textures sdl/event_manager sdl/renderer sdl/window sdl/cursor\
+              widgets signals modifiers instruments standart user
 VPATH += $(SRC_DIRS)
 
 INC_DIRS := include
@@ -26,14 +27,15 @@ CXX_FLAGS += -D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive
 
 SDL_FLAGS := -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 LD_FLAGS := -Wl,-export-dynamic
+PNG_FLAGS := -lpng
 
 all: prepare $(APPLICATION)
 
 $(APPLICATION): $(OBJ)
-	@$(CXX) $(LD_FLAGS) $^ -o $@ $(CXX_FLAGS) $(SDL_FLAGS)
+	@$(CXX) $(LD_FLAGS) $^ -o $@ $(CXX_FLAGS) $(SDL_FLAGS) $(PNG_FLAGS)
 
 $(BIN_DIR)/%.o: %.cpp
-	@$(CXX) $< -c -MD -o $@ $(CXX_FLAGS) $(SDL_FLAGS)
+	@$(CXX) $< -c -MD -o $@ $(CXX_FLAGS) $(SDL_FLAGS) $(PNG_FLAGS)
 
 -include $(wildcard $(BIN_DIR)/*.d)
 

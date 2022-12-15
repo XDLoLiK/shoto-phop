@@ -140,7 +140,7 @@ uint64_t booba::createLabel(size_t x, size_t y, size_t w, size_t h, const char* 
 uint64_t booba::createSlider(size_t x, size_t y, size_t w, size_t h, int64_t minValue, int64_t maxValue, int64_t startValue)
 {
 	Rect bounds = {x, y, w, h};
-	SimpleSlider* newScrollbar = new SimpleSlider(PluginManager::getPluginManager()->getCurTool(), maxValue, startValue,
+	SimpleSlider* newScrollbar = new SimpleSlider(PluginManager::getPluginManager()->getCurTool(), minValue, maxValue, startValue,
 		                                          bounds, PluginManager::getPluginManager()->getCanvas());
 	PluginManager::getPluginManager()->getCanvas()->addChild(newScrollbar);
 	PluginManager::getPluginManager()->addWidget(newScrollbar);

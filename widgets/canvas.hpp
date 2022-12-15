@@ -8,6 +8,7 @@
 #include "instrument.hpp"
 #include "tool_manager.hpp"
 #include "scrollbar.hpp"
+#include "dir.hpp"
 
 #include "modifiers/framable.hpp"
 
@@ -21,7 +22,7 @@ public:
 	Canvas(Canvas&)            = delete;
 
 	void save();
-	void saveAs();
+	void saveAs(const std::string& path = "");
 	void open();
 
 public:
@@ -40,9 +41,10 @@ private:
 	Surface m_drawingSurface = Surface();
 
 	/* Cancel actions */
-	size_t m_maxStates = 32;
+	int m_curState  = 0;
+	int m_maxStates = 32;
 	bool m_ctrlPressed = false;
-	std::deque<Color*> m_prevStates = {};
+	std::deque<Color*> m_states = {};
 
 	/* Periphery */
 	Frame*      m_cornerSquare  = nullptr;

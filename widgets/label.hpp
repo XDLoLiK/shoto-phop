@@ -3,6 +3,8 @@
 
 #include "widget.hpp"
 
+#define DEFAULT_FONT "fonts/NotoSans-Regular.ttf"
+
 class Label : public Widget
 {
 public:

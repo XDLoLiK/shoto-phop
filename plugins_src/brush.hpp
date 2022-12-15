@@ -27,6 +27,7 @@ private:
 	int m_brushSize = 4; /* size in pixels */
 
 	bool m_mouseIsPressed = false;
+	uint64_t m_sizeSlider = 0;
 };
 
 #endif // BRUSH_TOOL_HPP

@@ -28,8 +28,8 @@ void SimpleButton::draw()
 	if (m_isHidden)
 		return;
 
-	drawSkin (m_bounds);
-	drawFrame(m_bounds);
+	drawSkin (this->getRealBounds());
+	drawFrame(this->getRealBounds());
 
 	m_label->draw();
 }

@@ -11,7 +11,8 @@ ColorPicker::ColorPicker(const Rect& bounds, Widget* parent):
 	Widget(bounds, parent)
 {
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.10;
+	const double colorWidWidthScale = 0.08;
+	const double colorOffsetScale   = 0.92;
 
 	m_colorPickerTone  = Surface(m_bounds.w * toneWidWidthScale,  m_bounds.h);
 	m_colorPickerColor = Surface(m_bounds.w * colorWidWidthScale, m_bounds.h);
@@ -31,7 +32,7 @@ Color ColorPicker::getColor()
 	return m_color;
 }
 
-void ColorPicker::fillWithColors()
+void ColorPicker::fillWithColors(int yc)
 {
 	int v = 100;
 	int s = 100;
@@ -53,11 +54,20 @@ void ColorPicker::fillWithColors()
 		}
 	}
 
+	Color lineColor = black;
+	Color outlineColor = white;
+
+	for (int x = 0; x < width; x++) {
+		pixmap[yc * width + x] = lineColor;
+		if (yc + 1 < height) pixmap[(yc + 1) * width + x] = outlineColor;
+		if (yc - 1 > 0)      pixmap[(yc - 1) * width + x] = outlineColor;
+	}
+
 	delete m_colorPickerColorTex;
 	m_colorPickerColorTex = new Texture(m_colorPickerColor);
 }
 
-void ColorPicker::fillWithTones()
+void ColorPicker::fillWithTones(int xc, int yc)
 {
 	int v = 100;
 	int s = 0;
@@ -81,6 +91,21 @@ void ColorPicker::fillWithTones()
 			Color curColor = fromHSVtoRGBA(h, s, v);
 			pixmap[y * width + x] = curColor;
 		}
+	}
+
+	Color lineColor = black;
+	Color outlineColor = white;
+
+	for (int x = 0; x < width; x++) {
+		pixmap[yc * width + x] = lineColor;
+		if (yc + 1 < height) pixmap[(yc + 1) * width + x] = outlineColor;
+		if (yc - 1 > 0)      pixmap[(yc - 1) * width + x] = outlineColor;
+	}
+
+	for (int y = 0; y < height; y++) {
+		pixmap[y * width + xc] = lineColor;
+		if (xc + 1 < width) pixmap[y * width + (xc + 1)] = outlineColor;
+		if (xc - 1 > 0)     pixmap[y * width + (xc - 1)] = outlineColor;
 	}
 
 	delete m_colorPickerToneTex;
@@ -148,21 +173,16 @@ Color fromHSVtoRGBA(int h, int s, int v)
 void ColorPicker::draw()
 {
 	Renderer* renderer = getApp()->getRenderer();
-	static int prevH = 0;
-
-	if (prevH != m_h) {
-		prevH = m_h;
-		this->fillWithTones();
-		this->fillWithColors();
-	}
 
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.10;
-	const double colorOffsetScale   = 0.90;
+	const double colorWidWidthScale = 0.08;
+	const double colorOffsetScale   = 0.92;
 
-	Rect toneBounds  = {m_bounds.x, m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
-	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y,
-		                m_bounds.w * colorWidWidthScale, m_bounds.h};
+	const Rect& bounds = this->getRealBounds();
+
+	Rect toneBounds  = {bounds.x, bounds.y, bounds.w * toneWidWidthScale,  bounds.h};
+	Rect colorBounds = {bounds.x + bounds.w * colorOffsetScale, bounds.y,
+		                bounds.w * colorWidWidthScale, bounds.h};
 
 	Rect m_copyToneBounds  = {0, 0, m_colorPickerTone.getWidth(),  m_colorPickerTone.getHeight()};
 	Rect m_copyColorBounds = {0, 0, m_colorPickerColor.getWidth(), m_colorPickerColor.getHeight()};
@@ -170,7 +190,7 @@ void ColorPicker::draw()
 	renderer->copyTexture(m_colorPickerToneTex,  toneBounds,  m_copyToneBounds);
 	renderer->copyTexture(m_colorPickerColorTex, colorBounds, m_copyColorBounds);
 
-	this->drawFrame(m_bounds);
+	this->drawFrame(bounds);
 }
 
 bool intersectsBounds(const Vec2& point, const Rect& bounds)
@@ -192,14 +212,16 @@ bool intersectsBounds(const Vec2& point, const Rect& bounds)
 
 bool ColorPicker::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
@@ -236,30 +258,41 @@ bool ColorPicker::onButtonRelease(MouseButton button, const Vec2& point)
 	}
 
 	const double toneWidWidthScale  = 0.90;
-	const double colorWidWidthScale = 0.10;
-	const double colorOffsetScale   = 0.90;
+	const double colorWidWidthScale = 0.08;
+	const double colorOffsetScale   = 0.92;
 
-	Rect toneBounds  = {m_bounds.x, m_bounds.y, m_bounds.w * toneWidWidthScale,  m_bounds.h};
-	Rect colorBounds = {m_bounds.x + m_bounds.w * colorOffsetScale, m_bounds.y,
-		                m_bounds.w * colorWidWidthScale, m_bounds.h};
+	const Rect& bounds = this->getRealBounds();
+
+	Rect toneBounds  = {bounds.x, bounds.y, bounds.w * toneWidWidthScale,  bounds.h};
+	Rect colorBounds = {bounds.x + bounds.w * colorOffsetScale, bounds.y,
+		                bounds.w * colorWidWidthScale, bounds.h};
+
+    static int lastX = 0;
+    static int lastY = 0;
+
+    int width  = 0;
+    int height = 0;
+    Color* pixmap = m_colorPickerTone.getPixmap(&width, &height);
 
 	if (intersectsBounds(point, toneBounds)) {
-		int width  = 0;
-		int height = 0;
-		Color* pixmap = m_colorPickerTone.getPixmap(&width, &height);
-
-		int x = static_cast<int>(point.getX()) - m_bounds.x;
-		int y = static_cast<int>(point.getY()) - m_bounds.y;
+		int x = static_cast<int>(point.getX()) - bounds.x;
+		int y = static_cast<int>(point.getY()) - bounds.y;
 
 		m_color = pixmap[y * width + x];
+		this->fillWithTones(x, y);
+
+		lastX = x;
+		lastY = y;
 	}
 
 	if (intersectsBounds(point, colorBounds)) {
-		double offset = point.getY() - static_cast<double>(m_bounds.y);
-		double rel    = offset / static_cast<double>(m_bounds.h);
+		double offset = point.getY() - static_cast<double>(bounds.y);
+		double rel    = offset / static_cast<double>(bounds.h);
 
 		double newH = 360.0 * rel;
 		m_h = static_cast<int>(newH);
+		this->fillWithColors(offset);
+		this->fillWithTones(lastX, lastY);
 	}
 }
 

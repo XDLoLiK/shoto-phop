@@ -34,5 +34,8 @@ void showCanvas(DynamicWindow* win);
 void pickForgroundColor(ColorPicker* picker);
 void pickBackgroundColor(ColorPicker* picker);
 void closeApp(App* app);
+void canvasSave(Canvas* canvas);
+void canvasSaveAs(Canvas* canvas);
+void canvasOpen(Canvas* canvas);
 
 #endif // MAIN_HPP

@@ -22,7 +22,7 @@ public:
 	DropList(DropList&)            = delete;
 
 	bool intersectsChildren(const Vec2& point);
-	void addEntry(Button* entry);
+	void addEntry(Widget* entry);
 
 public:
 	virtual void addChild   (Widget* child) override;

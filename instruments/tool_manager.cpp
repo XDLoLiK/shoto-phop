@@ -87,6 +87,17 @@ bool ToolManager::reactToButtonRelease(Surface& surf, MouseButton button, const 
 	m_currentTool->apply(&surf, &genEvent);
 }
 
+bool ToolManager::reactToMouseLeave(Surface& surf)
+{
+	if (!m_currentTool)
+		return false;
+
+	booba::Event genEvent = {};
+	genEvent.type = booba::EventType::CanvasMLeft;
+
+	m_currentTool->apply(&surf, &genEvent);
+}
+
 bool ToolManager::reactToKeyPress(Surface&, Key)
 {
 	if (!m_currentTool)
@@ -103,10 +114,18 @@ bool ToolManager::reactToKeyRelease(Surface&, Key)
 	return false;
 }
 
-bool ToolManager::reactToTick(Surface&, Time time)
+bool ToolManager::reactToTick(Surface& surf, uint64_t time)
 {
 	if (!m_currentTool) 
 		return false;
+
+	booba::Event genEvent = {};
+	genEvent.type = booba::EventType::TimerEvent;
+	genEvent.Oleg.tedata = {time};
+
+	m_currentTool->apply(&surf, &genEvent);
+
+	return true;
 }
 
 void ToolManager::operator+=(booba::Tool* tool)

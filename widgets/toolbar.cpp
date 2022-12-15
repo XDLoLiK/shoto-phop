@@ -1,8 +1,12 @@
 #include "toolbar.hpp"
 #include "app.hpp"
 
-void selectTool(booba::Tool* tool)
+void selectTool(ToolSelectContext* context)
 {
+	booba::Tool* tool = context->tool;
+	ContextButton<ToolSelectContext>* btn = context->btn;
+	Toolbar* toolbar = context->toolbar;
+
 	booba::Tool* curTool = ToolManager::getToolManager()->getCurTool();
 	const std::vector<Widget*>* wids = PluginManager::getPluginManager()->getToolWidgets(curTool);
 
@@ -20,6 +24,11 @@ void selectTool(booba::Tool* tool)
 			wids->at(i)->setHidden(false);
 		}
 	}
+
+	for (size_t i = 0; i < toolbar->getSelectors().size(); i++) {
+		toolbar->getSelectors().at(i)->setFrameColor(white);
+	}
+	btn->setFrameColor(black);
 }
 
 Toolbar::Toolbar(const Rect& bounds, Widget* parent):
@@ -34,6 +43,15 @@ Toolbar::~Toolbar()
 	for (size_t i = 0; i < m_selectors.size(); i++) {
 		delete m_selectors[i];
 	}
+
+	for (size_t i = 0; i < m_contexts.size(); i++) {
+		delete m_contexts[i];
+	}
+}
+
+const std::vector<ContextButton<ToolSelectContext>*>& Toolbar::getSelectors()
+{
+	return m_selectors;
 }
 
 void Toolbar::addTool(booba::Tool* tool)
@@ -44,12 +62,15 @@ void Toolbar::addTool(booba::Tool* tool)
 	int y = h * (m_selectors.size() * 2 + 1);
 	Rect newBounds = {x, y, w, h};
 
-	ContextButton<booba::Tool>* newButton = new ContextButton<booba::Tool>("", newBounds, black, this);
+	ContextButton<ToolSelectContext>* newButton = new ContextButton<ToolSelectContext>("", newBounds, black, this);
 
 	newButton->setFrameColor(NO_FRAME);
 	newButton->setBackground(std::string("./plugins/") + std::string(tool->getTexture()));
 
-	newButton->setContext(tool);
+	ToolSelectContext* newContext = new ToolSelectContext(tool, newButton, this);
+	m_contexts.push_back(newContext);
+
+	newButton->setContext(newContext);
 	newButton->setAction(selectTool);
 	newButton->setHidden(false);
 
@@ -69,8 +90,8 @@ void Toolbar::draw()
 		return;
 	}
 
-	this->drawSkin (m_bounds);
-	this->drawFrame(m_bounds);
+	this->drawSkin (this->getRealBounds());
+	this->drawFrame(this->getRealBounds());
 }
 
 bool Toolbar::intersects(const Vec2& point)
@@ -93,7 +114,7 @@ bool Toolbar::intersects(const Vec2& point)
 void Toolbar::shiftIcons(int val)
 {
 	for (size_t i = 0; i < m_selectors.size(); i++) {
-		m_selectors[i]->setGeometry(m_selectors[i]->getBounds().x + val - m_bounds.x, m_selectors[i]->getBounds().y - m_bounds.y);
+		m_selectors[i]->setGeometry(m_selectors[i]->getBounds().x + val, m_selectors[i]->getBounds().y);
 	}
 }
 

@@ -29,7 +29,9 @@ public:
 
 	bool reactToKeyPress  (Surface& surf, Key key);
 	bool reactToKeyRelease(Surface& surf, Key key);
-	bool reactToTick      (Surface& surf, Time time);
+	bool reactToTick      (Surface& surf, uint64_t time);
+
+	bool reactToMouseLeave(Surface& surf);
 
 private:
 	std::vector<booba::Tool*> m_tools = {};

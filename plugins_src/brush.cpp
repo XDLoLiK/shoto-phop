@@ -52,9 +52,18 @@ void BrushTool::apply(booba::Image* image, const booba::Event* event)
 
 			break;
 
+		case booba::EventType::CanvasMLeft:
+			m_mouseIsPressed = false;
+			break;
+
+		case booba::EventType::SliderMoved:
+			if (event->Oleg.smedata.id == m_sizeSlider) {
+				m_brushSize = event->Oleg.smedata.value;
+			}
+			break;
+
 		case booba::EventType::NoEvent:
 		case booba::EventType::ButtonClicked:
-		case booba::EventType::SliderMoved:
 		case booba::EventType::CanvasMPressed:
 		case booba::EventType::CanvasMReleased:
 		case booba::EventType::CanvasMMoved:
@@ -71,8 +80,9 @@ const char* BrushTool::getTexture()
 
 void BrushTool::buildSetupWidget()
 {
-	booba::setToolBarSize(200, 100);
-	booba::createLabel(0, 0, 100, 40, "DICK");
+	booba::setToolBarSize(200, 50);
+	m_sizeSlider = booba::createSlider(10, 10, 140, 20, 2, 20, 4);
+	booba::createLabel(160, 10, 35, 20, "Size");
 }
 
 void BrushTool::drawPoint(booba::Image* image, const std::pair<int, int>& point)

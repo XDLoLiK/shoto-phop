@@ -36,7 +36,7 @@ void SimpleCanvas::draw()
 	Rect copyBounds = {0, 0, m_drawingSurface.getWidth(), m_drawingSurface.getHeight()};
 
 	Renderer* renderer = getApp()->getRenderer();
-	renderer->copyTexture(pictureTex, m_bounds, copyBounds);
+	renderer->copyTexture(pictureTex, this->getRealBounds(), copyBounds);
 
 	delete pictureTex;
 }

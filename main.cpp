@@ -11,16 +11,16 @@ int main()
 	Canvas canvas({400, 140, 1220, 820});
 	canvas.show();
 
-	Toolbar* toolbar = new Toolbar({0, 52, 60, 1080 - 52});
+	Toolbar* toolbar = new Toolbar({0, 40, 60, 1080 - 40});
 	toolbar->addTools(PluginManager::getPluginManager()->getTools());
 	toolbar->show();
 
-	Frame menuFrame({0, 0, 1920, 52});
+	Frame menuFrame({0, 0, 1920, 40});
 	menuFrame.setBackground(Color(251, 224, 243, 140));
 	menuFrame.setFrameColor(Color(251, 224, 243, 140));
 	menuFrame.show();
 
-	ContextButton<App> closeButton("Exit", {0, 0, 100, 52});
+	ContextButton<App> closeButton("Exit", {0, 0, 100, 40});
 	closeButton.setContext(&app);
 	closeButton.setAction(closeApp);
 	closeButton.setFrameColorDefault(Color(231, 178, 212, 255));
@@ -30,22 +30,25 @@ int main()
 	closeButton.setShortcut(SDLK_e);
 	closeButton.show();
 
-	DropList fileList("File", {100, 0, 100, 52});
+	DropList fileList("File", {100, 0, 100, 40});
 	fileList.setShortcut(SDLK_f);
 	fileList.show();
 
-	Button saveButton("Save", {0, 0, 360, 52});
-	saveButton.buttonClick += METHOD(canvas, Canvas::save);
+	ContextButton<Canvas> saveButton("Save", {0, 0, 360, 40});
+	saveButton.setContext(&canvas);
+	saveButton.setAction(canvasSave);
 	saveButton.setShortcut(SDLK_s);
 	fileList.addEntry(&saveButton);
 
-	Button saveAsButton("Save As", {0, 0, 360, 52});
-	saveAsButton.buttonClick += METHOD(canvas, Canvas::saveAs);
+	ContextButton<Canvas> saveAsButton("Save As", {0, 0, 360, 40});
+	saveAsButton.setContext(&canvas);
+	saveAsButton.setAction(canvasSaveAs);
 	saveAsButton.setShortcut(SDLK_a);
 	fileList.addEntry(&saveAsButton);
 
-	Button openButton("Open", {0, 0, 360, 52});
-	openButton.buttonClick += METHOD(canvas, Canvas::open);
+	ContextButton<Canvas> openButton("Open", {0, 0, 360, 40});
+	openButton.setContext(&canvas);
+	openButton.setAction(canvasOpen);
 	openButton.setShortcut(SDLK_o);
 	fileList.addEntry(&openButton);
 
@@ -69,13 +72,13 @@ int main()
 	bgChooseButton.setFrameColorDefault(Color(120, 120, 120, 255));
 	bgChooseButton.setFrameColorHover(Color(100, 100, 100, 255));
 
-	ContextButton<DynamicWindow> colorButton("Color", {200, 0, 100, 52});
+	ContextButton<DynamicWindow> colorButton("Color", {200, 0, 100, 40});
 	colorButton.setContext(colorChoiseWin);
 	colorButton.setAction(showWin);
 	colorButton.setShortcut(SDLK_c);
 	colorButton.show();
 
-	ContextButton<DynamicWindow>* toolButton = new ContextButton<DynamicWindow>("Tool", {300, 0, 100, 52});
+	ContextButton<DynamicWindow>* toolButton = new ContextButton<DynamicWindow>("Tool", {300, 0, 100, 40});
 	toolButton->setContext(PluginManager::getPluginManager()->getCanvas());
 	toolButton->setAction(showCanvas);
 	toolButton->setShortcut(SDLK_t);

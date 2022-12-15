@@ -1,20 +1,21 @@
 #include "simple_slider.hpp"
 #include "app.hpp"
 
-SimpleSlider::SimpleSlider(booba::Tool* connectedTool, int max, int start,
+SimpleSlider::SimpleSlider(booba::Tool* connectedTool, int64_t min, int64_t max, int64_t start,
               const Rect& bounds, Widget* parent):
 	Frame(bounds, parent),
 	m_connectedTool(connectedTool),
+	m_minValue(min),
 	m_maxValue(max),
 	m_curValue(start)
 {
 	int sliderWidth = m_bounds.w / 20;
 
-	double rel = static_cast<double>(start) / static_cast<double>(max);
+	double rel = static_cast<double>(start) / static_cast<double>(max - min);
 	int startX = static_cast<int>(rel * (m_bounds.w - sliderWidth));
 
 	const Rect& canvasBounds = PluginManager::getPluginManager()->getCanvas()->getBounds();
-	Rect sliderBounds = {startX - canvasBounds.x, 0 - canvasBounds.y, sliderWidth, m_bounds.h};
+	Rect sliderBounds = {startX, 0, sliderWidth, m_bounds.h};
 
 	m_slider = new Frame(sliderBounds, this);
 	m_slider->setHidden(false);
@@ -33,41 +34,27 @@ void SimpleSlider::draw()
 	if (m_isHidden)
 		return;
 
-	drawFrame(m_bounds);
-	drawSkin (m_bounds);
+	drawFrame(this->getRealBounds());
+	drawSkin (this->getRealBounds());
 }
 
 bool SimpleSlider::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
 
 	return true;
-}
-
-void SimpleSlider::setGeometry(const Rect& bounds)
-{
-	int relX = m_bounds.x - m_slider->getBounds().x;
-	int relY = m_bounds.x - m_slider->getBounds().y;
-
-	m_bounds = bounds;
-	m_slider->setGeometry(relX, relY);
-
-	Widget* curWid = m_parent;
-	while (curWid) {
-		m_bounds.x += curWid->getBounds().x;
-		m_bounds.y += curWid->getBounds().y;
-		curWid = curWid->getParent();
-	}
 }
 
 bool SimpleSlider::onMouseMove(const Vec2& point, const Vec2& motion)
@@ -78,7 +65,7 @@ bool SimpleSlider::onMouseMove(const Vec2& point, const Vec2& motion)
 	bool res = m_childrenManager.callOnMouseMove(point, motion);
 
 	if (m_sliderIsHeld) {
-		int x = static_cast<int>(point.getX()) - m_bounds.x - m_offset;
+		int x = static_cast<int>(point.getX()) - this->getRealBounds().x - m_offset;
 		x = std::min(std::max(0, x), m_bounds.w - m_slider->getBounds().w);
 		m_slider->setGeometry(x, 0);
 
@@ -87,7 +74,7 @@ bool SimpleSlider::onMouseMove(const Vec2& point, const Vec2& motion)
 
 	int maxX = m_bounds.w - m_slider->getBounds().w;
 	double rel = static_cast<double>(m_slider->getBounds().x) / static_cast<double>(maxX);
-	int val = rel * m_maxValue;
+	int val = m_minValue + rel * (m_maxValue - m_minValue);
 
 	if (m_connectedTool) {
 		booba::Event genEvent = {};
@@ -109,7 +96,7 @@ bool SimpleSlider::onButtonClick(MouseButton button, const Vec2& point)
 
 	if (button == SDL_BUTTON_LEFT && m_slider->intersects(point)) {
 		m_sliderIsHeld = true;
-		m_offset = static_cast<int>(point.getX()) - m_slider->getBounds().x;;
+		m_offset = static_cast<int>(point.getX()) - m_slider->getRealBounds().x;;
 
 		res &= true;
 	}

@@ -52,6 +52,10 @@ void EraserTool::apply(booba::Image* image, const booba::Event* event)
 
 			break;
 
+		case booba::EventType::CanvasMLeft:
+			m_mouseIsPressed = false;
+			break;
+
 		case booba::EventType::NoEvent:
 		case booba::EventType::ButtonClicked:
 		case booba::EventType::SliderMoved:
@@ -71,7 +75,9 @@ const char* EraserTool::getTexture()
 
 void EraserTool::buildSetupWidget()
 {
-
+	booba::setToolBarSize(200, 50);
+	m_sizeSlider = booba::createSlider(10, 10, 140, 20, 2, 20, 4);
+	booba::createLabel(160, 10, 35, 20, "Size");
 }
 
 void EraserTool::drawPoint(booba::Image* image, const std::pair<int, int>& point)

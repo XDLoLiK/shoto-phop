@@ -35,3 +35,18 @@ void closeApp(App* app)
 {
 	app->close();
 }
+
+void canvasSave(Canvas* canvas)
+{
+	canvas->save();
+}
+
+void canvasSaveAs(Canvas* canvas)
+{
+	canvas->saveAs();
+}
+
+void canvasOpen(Canvas* canvas)
+{
+	canvas->open();
+}
