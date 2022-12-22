@@ -1,0 +1,81 @@
+#include <cassert>
+#include <iostream>
+
+#include "tools.hpp"
+
+namespace booba {
+    static uint32_t RED = 0xff000000;
+
+
+    class Eyedropper : public Tool {
+    private:
+        uint64_t canvas = -1;
+        uint32_t color = RED;
+        bool colorSelected = false;
+        bool pressed = false;
+        size_t w;
+        size_t h;
+
+    public:
+        virtual ~Eyedropper() override { }
+
+        virtual void apply(Image *im, const Event *ev) override
+        {
+            static bool firstRun = true;
+            if (firstRun) {
+                firstRun = false;
+                h = im->getH();
+                w = im->getW();
+            }
+
+            size_t x = ev->Oleg.mbedata.x;
+            size_t y = ev->Oleg.mbedata.y;
+
+            if (ev->type == EventType::MouseReleased)
+                pressed = false;
+
+            if (ev->type == EventType::MouseMoved and pressed and colorSelected) {
+                for (size_t i = 0; i < 5; ++i)
+                    for (size_t j = 0; j < 5; ++j)
+                        if (x + i < w and y + j < h)
+                            im->setPixel(x + i, y + j, color);
+            }
+
+            if (ev->type != EventType::MousePressed)
+                return;
+
+            if (ev->Oleg.mbedata.button == MouseButton::Right) {
+                color = im->getPixel(x, y);
+                colorSelected = true;
+                if (canvas != -1) {
+                    for (size_t i = 0; i < 40; ++i)
+                        for (size_t j = 0; j < 40; ++j)
+                            putPixel(canvas, i, j, color);
+                }
+            } else if (colorSelected) {
+                pressed = true;
+                for (size_t i = 0; i < 5; ++i)
+                    for (size_t j = 0; j < 5; ++j)
+                        if (x + i < w and y + j < h)
+                            im->setPixel(x + i, y + j, color);
+            }
+        }
+
+        virtual const char* getTexture() override
+        {
+            return "./eyedropper.png";
+        }
+
+        virtual void buildSetupWidget() override
+        {
+            setToolBarSize(200, 100);
+            canvas = createCanvas(20, 20, 40, 40);
+        }
+    };
+
+    void init_module()
+    {
+        Eyedropper *tool = new Eyedropper;
+        addTool(tool);
+    }
+}

@@ -5,7 +5,8 @@ SimpleCanvas::SimpleCanvas(booba::Tool* connectedTool, const Rect& bounds, Widge
 	Widget(bounds, parent),
 	m_connectedTool(connectedTool)
 {
-
+	m_drawingSurface = Surface(bounds.w, bounds.h);
+	m_curTexture = new Texture(m_drawingSurface);
 }
 
 SimpleCanvas::~SimpleCanvas()
@@ -13,9 +14,10 @@ SimpleCanvas::~SimpleCanvas()
 
 }
 
-void SimpleCanvas::setPixel(uint32_t x, uint32_t y, uint32_t color)
+void SimpleCanvas::setPixel(size_t x, size_t y, uint32_t color)
 {
 	m_drawingSurface.setPixel(x, y, color);
+	m_changed = true;
 }
 
 void SimpleCanvas::blit(Surface* surface, const Rect& bounds)
@@ -28,29 +30,45 @@ void SimpleCanvas::blit(Surface* surface, const Rect& bounds)
 			m_drawingSurface.setPixel(bounds.x + x, bounds.y + y, surface->getPixel(x, y));
 		}
 	}
+
+	m_changed = true;
+}
+
+void SimpleCanvas::fillColor(uint32_t color)
+{
+	m_drawingSurface.fillColor(Color(color));
+	m_changed = true;
 }
 
 void SimpleCanvas::draw()
 {
-	Texture* pictureTex = new Texture(m_drawingSurface);
-	Rect copyBounds = {0, 0, m_drawingSurface.getWidth(), m_drawingSurface.getHeight()};
+	if (m_changed) {
+		m_changed = false;
+		delete m_curTexture;
+		m_curTexture = new Texture(m_drawingSurface);
+	}
 
+	if (!m_curTexture) {
+		return;
+	}
+
+	Rect copyBounds = {0, 0, m_curTexture->getBounds().w, m_curTexture->getBounds().h};
 	Renderer* renderer = getApp()->getRenderer();
-	renderer->copyTexture(pictureTex, this->getRealBounds(), copyBounds);
-
-	delete pictureTex;
+	renderer->copyTexture(m_curTexture, this->getRealBounds(), copyBounds);
 }
 
 bool SimpleCanvas::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
@@ -68,14 +86,18 @@ bool SimpleCanvas::onMouseMove(const Vec2& point, const Vec2& motion)
 		return false;
 	}
 
-	booba::Event genEvent = {};
-	genEvent.type = booba::EventType::CanvasMMoved;
+	if (this->intersects(point)) {
+		const Rect& bounds = this->getRealBounds();
 
-	genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
-	genEvent.Oleg.cedata.x  = static_cast<int32_t>(point.getX());
-	genEvent.Oleg.cedata.y  = static_cast<int32_t>(point.getY());
+		booba::Event genEvent = {};
+		genEvent.type = booba::EventType::CanvasMMoved;
 
-	m_connectedTool->apply(nullptr, &genEvent);
+		genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
+		genEvent.Oleg.cedata.x  = static_cast<size_t>(point.getX() - bounds.x);
+		genEvent.Oleg.cedata.y  = static_cast<size_t>(point.getY() - bounds.y);
+
+		m_connectedTool->apply(nullptr, &genEvent);
+	}
 }
 
 bool SimpleCanvas::onButtonClick(MouseButton button, const Vec2& point)
@@ -88,14 +110,18 @@ bool SimpleCanvas::onButtonClick(MouseButton button, const Vec2& point)
 		return false;
 	}
 
-	booba::Event genEvent = {};
-	genEvent.type = booba::EventType::CanvasMPressed;
-	
-	genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
-	genEvent.Oleg.cedata.x  = static_cast<int32_t>(point.getX());
-	genEvent.Oleg.cedata.y  = static_cast<int32_t>(point.getY());
+	if (this->intersects(point)) {
+		const Rect& bounds = this->getRealBounds();
 
-	m_connectedTool->apply(nullptr, &genEvent);
+		booba::Event genEvent = {};
+		genEvent.type = booba::EventType::CanvasMPressed;
+		
+		genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
+		genEvent.Oleg.cedata.x  = static_cast<size_t>(point.getX() - bounds.x);
+		genEvent.Oleg.cedata.y  = static_cast<size_t>(point.getY() - bounds.y);
+
+		m_connectedTool->apply(nullptr, &genEvent);
+	}
 }
 
 bool SimpleCanvas::onButtonRelease(MouseButton button, const Vec2& point)
@@ -108,14 +134,18 @@ bool SimpleCanvas::onButtonRelease(MouseButton button, const Vec2& point)
 		return false;
 	}
 
-	booba::Event genEvent = {};
-	genEvent.type = booba::EventType::CanvasMReleased;
-	
-	genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
-	genEvent.Oleg.cedata.x  = static_cast<int32_t>(point.getX());
-	genEvent.Oleg.cedata.y  = static_cast<int32_t>(point.getY());
+	if (this->intersects(point)) {
+		const Rect& bounds = this->getRealBounds();
 
-	m_connectedTool->apply(nullptr, &genEvent);
+		booba::Event genEvent = {};
+		genEvent.type = booba::EventType::CanvasMReleased;
+		
+		genEvent.Oleg.cedata.id = reinterpret_cast<uint64_t>(this);
+		genEvent.Oleg.cedata.x  = static_cast<size_t>(point.getX() - bounds.x);
+		genEvent.Oleg.cedata.y  = static_cast<size_t>(point.getY() - bounds.y);
+
+		m_connectedTool->apply(nullptr, &genEvent);
+	}
 }
 
 bool SimpleCanvas::onKeyPress(Key key)

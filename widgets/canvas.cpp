@@ -8,8 +8,14 @@
 Canvas::Canvas(const Rect& bounds, Widget* parent):
 	ContainerWidget(bounds, parent)
 {
-	m_drawingSurface = Surface(1920, 1080);
-	m_drawingSurface.fillColor(white);
+	m_drawingSurface = new Surface(1920, 1080);
+	m_drawingSurface->fillColor(white);
+	m_historyBuffer.initBuffer(m_drawingSurface);
+
+	Surface* newSurf = new Surface(1920, 1080);
+	newSurf->fillColor(white);
+	m_layers.push_back(m_drawingSurface);
+	m_layers.push_back(newSurf);
 
 	m_copyBounds = Rect(0, 0, m_bounds.w, m_bounds.h);
 
@@ -23,16 +29,6 @@ Canvas::Canvas(const Rect& bounds, Widget* parent):
 	m_cornerSquare->setBackground(Color(102, 102, 102, 255));
 	m_cornerSquare->setFrameColor(Color(102, 102, 102, 255));
 	m_cornerSquare->show();
-
-	m_states.resize(m_maxStates, nullptr);
-
-	size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
-	size_t sizeofPixel  = sizeof (Color);
-
-	Color* newState = new Color[pixelsNumber];
-	std::memcpy(newState, m_drawingSurface.getPixmap(), pixelsNumber * sizeofPixel);
-
-	m_states[m_curState] = newState;
 }
 
 Canvas::~Canvas()
@@ -40,29 +36,38 @@ Canvas::~Canvas()
 	delete m_horizontalBar;
 	delete m_verticalBar;
 	delete m_cornerSquare;
-
-	while (!m_states.empty()) {
-		Color* toDelete = m_states.back();
-		m_states.pop_back();
-		delete [] toDelete;
-	}
 }
 
 void Canvas::save()
 {
-	this->saveAs("a.txt");
+	if (m_curFile.length() == 0) {
+		this->saveAs();
+		return;
+	}
+
+	int width  = m_drawingSurface->getWidth();
+	int height = m_drawingSurface->getHeight();
+	uint8_t* data = reinterpret_cast<uint8_t*>(m_drawingSurface->getPixmap());
+
+	uint8_t* img = new uint8_t[width * height * 4];
+    for(int i = 0; i < width * height * 4; i++) {
+        img[i] = data[i];
+    }
+
+    lodepng::encode(m_curFile, img, width, height, LCT_RGBA);
+    delete[] img;
 }
 
-void Canvas::saveAs(const std::string& path)
+void Canvas::saveAs()
 {
 	auto file = pfd::save_file("Choose file to save",
-                               getCurrentWorkingDir() + pfd::path::separator() + "a.png",
+                               getCurrentWorkingDir() + pfd::path::separator() + m_curFile,
                                { "All Files", "*" },
                                pfd::opt::force_overwrite);
 
-	int width  = m_drawingSurface.getWidth();
-	int height = m_drawingSurface.getHeight();
-	uint8_t* data = reinterpret_cast<uint8_t*>(m_drawingSurface.getPixmap());
+	int width  = m_drawingSurface->getWidth();
+	int height = m_drawingSurface->getHeight();
+	uint8_t* data = reinterpret_cast<uint8_t*>(m_drawingSurface->getPixmap());
 
 	uint8_t* img = new uint8_t[width * height * 4];
     for(int i = 0; i < width * height * 4; i++) {
@@ -71,6 +76,7 @@ void Canvas::saveAs(const std::string& path)
 
     if (file.result().size()) {
     	lodepng::encode(file.result(), img, width, height, LCT_RGBA);
+    	m_curFile = file.result();
     }
 
     delete[] img;
@@ -83,8 +89,8 @@ void Canvas::open()
                                pfd::opt::multiselect);
 
 	std::vector<uint8_t> img = {};
-	uint32_t width  = static_cast<uint32_t>(m_drawingSurface.getWidth());
-	uint32_t height = static_cast<uint32_t>(m_drawingSurface.getHeight());
+	uint32_t width  = static_cast<uint32_t>(m_drawingSurface->getWidth());
+	uint32_t height = static_cast<uint32_t>(m_drawingSurface->getHeight());
 
 	if (!file.result().size()) {
 		return;
@@ -95,15 +101,17 @@ void Canvas::open()
 		std::cout << lodepng_error_text(error) << std::endl;
 	}
 
-	uint8_t* data = reinterpret_cast<uint8_t*>(m_drawingSurface.getPixmap());
+	uint8_t* data = reinterpret_cast<uint8_t*>(m_drawingSurface->getPixmap());
 	for (int i = 0; i < width * height * 4; i++) {
 		data[i] = img[i];
 	}
+
+	m_curFile = file.result().at(0);
 }
 
 void Canvas::draw()
 {
-	Texture* pictureTex = new Texture(m_drawingSurface);
+	Texture* pictureTex = new Texture(*m_drawingSurface);
 
 	Renderer* renderer = getApp()->getRenderer();
 	renderer->copyTexture(pictureTex, this->getRealBounds(), m_copyBounds);
@@ -138,7 +146,7 @@ bool Canvas::onMouseMove(const Vec2& point, const Vec2& motion)
 	bool res = false;
 
 	if (!this->intersects(point)) {
-		res &= ToolManager::getToolManager()->reactToMouseLeave(m_drawingSurface);
+		res &= ToolManager::getToolManager()->reactToMouseLeave(*m_drawingSurface);
 		res &= m_childrenManager.callOnMouseMove(point, motion);
 		return res;
 	}
@@ -146,7 +154,7 @@ bool Canvas::onMouseMove(const Vec2& point, const Vec2& motion)
 	const Rect& bounds = this->getRealBounds();
 	Vec2 relPoint = point - Vec2(bounds.x, bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
 
-	res &= ToolManager::getToolManager()->reactToMouseMove(m_drawingSurface, relPoint, motion);
+	res &= ToolManager::getToolManager()->reactToMouseMove(*m_drawingSurface, relPoint, motion);
 	res &= m_childrenManager.callOnMouseMove(point, motion);
 
 	return res;
@@ -164,7 +172,7 @@ bool Canvas::onButtonClick(MouseButton button, const Vec2& point)
 
 	const Rect& bounds = this->getRealBounds();
 	Vec2 relPoint = point - Vec2(bounds.x, bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
-	res &= ToolManager::getToolManager()->reactToButtonClick(m_drawingSurface, button, relPoint);
+	res &= ToolManager::getToolManager()->reactToButtonClick(*m_drawingSurface, button, relPoint);
 
 	return res;
 }
@@ -174,21 +182,11 @@ bool Canvas::onButtonRelease(MouseButton button, const Vec2& point)
 	if (m_isHidden || !this->intersects(point))
 		return false;
 
-	size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
-	size_t sizeofPixel  = sizeof (Color);
-
-	Color* newState = new Color[pixelsNumber];
-	std::memcpy(newState, m_drawingSurface.getPixmap(), pixelsNumber * sizeofPixel);
-
-	m_curState = (m_curState + 1) % m_maxStates;
-	if (m_states[m_curState]) {
-		delete [] m_states[m_curState];
-	}
-	m_states[m_curState] = newState;
+	m_historyBuffer.addState(m_drawingSurface);
 
 	const Rect& bounds = this->getRealBounds();
 	Vec2 relPoint = point - Vec2(bounds.x, bounds.y) + Vec2(m_copyBounds.x, m_copyBounds.y);
-	bool res = ToolManager::getToolManager()->reactToButtonRelease(m_drawingSurface, button, relPoint);
+	bool res = ToolManager::getToolManager()->reactToButtonRelease(*m_drawingSurface, button, relPoint);
 	res &= m_childrenManager.callOnButtonRelease(button, point);
 
 	return res;
@@ -199,50 +197,48 @@ bool Canvas::onKeyPress(Key key)
 	if (m_isHidden)
 		return false;
 
-	bool res = ToolManager::getToolManager()->reactToKeyPress(m_drawingSurface, key);
+	bool res = ToolManager::getToolManager()->reactToKeyPress(*m_drawingSurface, key);
 	res &= m_childrenManager.callOnKeyPress(key);
 
 	if (key == SDLK_LCTRL) {
 		m_ctrlPressed = true;
 	}
 
-	if (key == SDLK_z && m_ctrlPressed) {
-		m_curState--;
-		if (m_curState < 0) {
-			m_curState = m_maxStates - 1;
+	if (m_ctrlPressed) {
+		switch (key) {
+			case SDLK_s:
+				this->save();
+				break;
+
+			case SDLK_a:
+				this->saveAs();
+				break;
+
+			case SDLK_o:
+				this->open();
+				break;
+
+			case SDLK_z:
+				m_historyBuffer.prevState(m_drawingSurface);
+				res &= true;
+				break;
+
+			case SDLK_y:
+				m_historyBuffer.nextState(m_drawingSurface);
+				res &= true;
+				break;
+
+			case SDLK_RIGHT:
+				m_drawingSurface = m_layers[1];
+				break;
+
+			case SDLK_LEFT:
+				m_drawingSurface = m_layers[0];
+				break;
+
+			default:
+				break;
 		}
-
-		Color* prevPixmap = m_states[m_curState];
-		if (prevPixmap == nullptr) {
-			m_curState = (m_curState + 1) % m_maxStates;
-
-			return false;
-		}
-
-		size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
-		size_t sizeofPixel  = sizeof (Color);
-
-		std::memcpy(m_drawingSurface.getPixmap(), prevPixmap, pixelsNumber * sizeofPixel);
-		res &= true;
-	}
-	else if (key == SDLK_y && m_ctrlPressed) {
-		m_curState = (m_curState + 1) % m_maxStates;
-
-		Color* nextPixmap = m_states[m_curState];
-		if (nextPixmap == nullptr) {
-			m_curState--;
-			if (m_curState < 0) {
-				m_curState = m_maxStates - 1;
-			}
-
-			return false;
-		}
-
-		size_t pixelsNumber = static_cast<size_t>(m_drawingSurface.getWidth() * m_drawingSurface.getHeight());
-		size_t sizeofPixel  = sizeof (Color);
-
-		std::memcpy(m_drawingSurface.getPixmap(), nextPixmap, pixelsNumber * sizeofPixel);
-		res &= true;
 	}
 
 	return res;
@@ -253,7 +249,7 @@ bool Canvas::onKeyRelease(Key key)
 	if (m_isHidden)
 		return false;
 
-	bool res = ToolManager::getToolManager()->reactToKeyRelease(m_drawingSurface, key);
+	bool res = ToolManager::getToolManager()->reactToKeyRelease(*m_drawingSurface, key);
 	res &= m_childrenManager.callOnKeyRelease(key);
 
 	if (key == SDLK_LCTRL) {
@@ -270,15 +266,15 @@ bool Canvas::onTick(Time time)
 
 	bool res = false;
 
-	float maxX = static_cast<float>(m_drawingSurface.getWidth() - m_bounds.w);
+	float maxX = static_cast<float>(m_drawingSurface->getWidth() - m_bounds.w);
 	int   newX = static_cast<int>(maxX * m_horizontalBar->getValue());
 	m_copyBounds.x = newX;
 
-	float maxY = static_cast<float>(m_drawingSurface.getHeight() - m_bounds.h);
+	float maxY = static_cast<float>(m_drawingSurface->getHeight() - m_bounds.h);
 	int   newY = static_cast<int>(maxY * m_verticalBar->getValue());
 	m_copyBounds.y = newY;
 
-	res = ToolManager::getToolManager()->reactToTick(m_drawingSurface, static_cast<uint64_t>(time));
+	res = ToolManager::getToolManager()->reactToTick(*m_drawingSurface, static_cast<uint64_t>(time));
 	res &= m_childrenManager.callOnTick(time);
 
 	this->draw();

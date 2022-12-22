@@ -168,9 +168,13 @@ void booba::putPixel(uint64_t canvas, size_t x, size_t y, uint32_t color)
 void booba::putSprite(uint64_t canvas, size_t x, size_t y, size_t w, size_t h, const char* texture)
 {
 	SimpleCanvas* canvasPtr = reinterpret_cast<SimpleCanvas*>(canvas);
-
 	Rect bounds = {x, y, w, h};
 	Surface* blitSurface = new Surface(std::string(texture));
-
 	canvasPtr->blit(blitSurface, bounds);
+}
+
+void booba::cleanCanvas(uint64_t canvasId, uint32_t color)
+{
+	SimpleCanvas* canvasPtr = reinterpret_cast<SimpleCanvas*>(canvasId);
+	canvasPtr->fillColor(color);
 }

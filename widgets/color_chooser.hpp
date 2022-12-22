@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "widget.hpp"
+#include "frame.hpp"
 
 #include "modifiers/framable.hpp"
 

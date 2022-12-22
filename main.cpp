@@ -37,19 +37,16 @@ int main()
 	ContextButton<Canvas> saveButton("Save", {0, 0, 360, 40});
 	saveButton.setContext(&canvas);
 	saveButton.setAction(canvasSave);
-	saveButton.setShortcut(SDLK_s);
 	fileList.addEntry(&saveButton);
 
 	ContextButton<Canvas> saveAsButton("Save As", {0, 0, 360, 40});
 	saveAsButton.setContext(&canvas);
 	saveAsButton.setAction(canvasSaveAs);
-	saveAsButton.setShortcut(SDLK_a);
 	fileList.addEntry(&saveAsButton);
 
 	ContextButton<Canvas> openButton("Open", {0, 0, 360, 40});
 	openButton.setContext(&canvas);
 	openButton.setAction(canvasOpen);
-	openButton.setShortcut(SDLK_o);
 	fileList.addEntry(&openButton);
 
 	DynamicWindow* colorChoiseWin = new DynamicWindow({100, 100, 600, 400});

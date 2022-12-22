@@ -13,8 +13,9 @@ size_t Surface::getW()
 
 uint32_t Surface::getPixel(size_t x, size_t y)
 {
-	uint32_t* pixmap = reinterpret_cast<uint32_t*>(this->getPixmap());
-	return pixmap[y * static_cast<size_t>(m_width) + x];
+	Color* pixmap = this->getPixmap();
+	Color myColor = pixmap[y * static_cast<size_t>(m_width) + x];
+	return myColor.mapRGBA();
 }
 
 void Surface::setPixel(size_t x, size_t y, uint32_t color)

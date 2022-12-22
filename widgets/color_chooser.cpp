@@ -47,7 +47,7 @@ void ColorPicker::fillWithColors(int yc)
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			double relH = static_cast<double>(y) / static_cast<double>(height);
-			h = maxH - static_cast<int>(maxH * relH);
+			h = static_cast<int>(maxH * relH);
 
 			Color curColor = fromHSVtoRGBA(h, s, v);
 			pixmap[y * width + x] = curColor;

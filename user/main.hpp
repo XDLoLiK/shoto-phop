@@ -1,6 +1,8 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+#include <thread>
+
 /* App */
 #include "app.hpp"
 

@@ -6,15 +6,15 @@ SimpleButton::SimpleButton(booba::Tool* connectedTool, const std::string& text,
 	Widget(bounds, parent),
 	m_connectedTool(connectedTool)
 {
-	m_label = new Label(text, m_bounds.h, black);
+	m_label = new Label(text, m_bounds.h, black, DEFAULT_FONT, this);
 
 	m_bounds.w = std::max(m_label->getBounds().w, m_bounds.w);
 	m_bounds.h = std::max(m_label->getBounds().h, m_bounds.h);
 
-	m_label->setGeometry(m_bounds.x + (m_bounds.w - m_label->getBounds().w) / 2, m_bounds.y);
+	m_label->setGeometry((m_bounds.w - m_label->getBounds().w) / 2, 0);
 
-	this->setBackground(Color(231, 178, 212, 255));
-	this->setFrameColor(Color(231, 178, 212, 255));
+	this->setBackground(Color(120, 120, 120, 255));
+	this->setFrameColor(Color(120, 120, 120, 255));
 }
 
 SimpleButton::~SimpleButton()
@@ -36,14 +36,16 @@ void SimpleButton::draw()
 
 bool SimpleButton::intersects(const Vec2& point)
 {
-	if (point.getX() < m_bounds.x || 
-		point.getX() > m_bounds.x + m_bounds.w)
+	const Rect& bounds = this->getRealBounds();
+
+	if (point.getX() < bounds.x || 
+		point.getX() > bounds.x + bounds.w)
 	{
 		return false;
 	}
 
-	if (point.getY() < m_bounds.y || 
-		point.getY() > m_bounds.y + m_bounds.h)
+	if (point.getY() < bounds.y || 
+		point.getY() > bounds.y + bounds.h)
 	{
 		return false;
 	}
@@ -58,13 +60,13 @@ bool SimpleButton::onMouseMove(const Vec2& point, const Vec2& motion)
 	}
 
 	if (!this->intersects(point)) {
-		this->setBackground(Color(231, 178, 212, 255));
-		this->setFrameColor(Color(231, 178, 212, 255));
+		this->setBackground(Color(120, 120, 120, 255));
+		this->setFrameColor(Color(120, 120, 120, 255));
 		return false;
 	}
 
-	this->setBackground(Color(185, 130, 183, 255));
-	this->setFrameColor(Color(185, 130, 183, 255));
+	this->setBackground(Color(100, 100, 100, 255));
+	this->setFrameColor(Color(100, 100, 100, 255));
 	return true;
 }
 
@@ -85,11 +87,13 @@ bool SimpleButton::onButtonRelease(MouseButton button, const Vec2& point)
 		return false;
 	}
 
-	booba::Event genEvent = {};
-	genEvent.type = booba::EventType::ButtonClicked;
-	genEvent.Oleg.bcedata.id = reinterpret_cast<uint64_t>(this);
+	if (this->intersects(point)) {
+		booba::Event genEvent = {};
+		genEvent.type = booba::EventType::ButtonClicked;
+		genEvent.Oleg.bcedata.id = reinterpret_cast<uint64_t>(this);
 
-	m_connectedTool->apply(nullptr, &genEvent);
+		m_connectedTool->apply(nullptr, &genEvent);
+	}
 }
 
 bool SimpleButton::onKeyPress(Key key)

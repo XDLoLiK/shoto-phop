@@ -12,8 +12,9 @@ public:
 	SimpleCanvas& operator=(SimpleCanvas& other) = delete;
 	SimpleCanvas(SimpleCanvas& other)            = delete;
 
-	void setPixel(uint32_t x, uint32_t y, uint32_t color);
+	void setPixel(size_t x, size_t y, uint32_t color);
 	void blit(Surface* surface, const Rect& bounds);
+	void fillColor(uint32_t color);
 
 	virtual void draw()                        override;
 	virtual bool intersects(const Vec2& point) override;
@@ -27,8 +28,10 @@ public:
 	virtual bool onTick(Time time)     override;
 
 private:
+	bool m_changed = true;
 	booba::Tool* m_connectedTool = nullptr;
 	Surface m_drawingSurface = Surface();
+	Texture* m_curTexture = nullptr;
 };
 
 #endif // SIMPLE_CANVAS_HPP
