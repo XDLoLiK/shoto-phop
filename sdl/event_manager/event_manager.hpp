@@ -1,6 +1,7 @@
 #ifndef EVENT_MANAGER_HPP
 #define EVENT_MANAGER_HPP
 
+#include <algorithm>
 #include <vector>
 #include <cassert>
 
